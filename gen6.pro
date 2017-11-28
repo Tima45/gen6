@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 TARGET = gen6
 TEMPLATE = app
@@ -24,8 +24,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    plot/qcustomplot.cpp \
+    game.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    plot/qcustomplot.h \
+    game.h
 
 FORMS    += mainwindow.ui
