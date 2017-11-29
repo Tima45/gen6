@@ -21,6 +21,7 @@ public:
     ~MainWindow();
     QThread *gameThread;
     Game *game;
+    QReadWriteLock locker;
     void initPlot();
 signals:
     void startGame();
@@ -30,6 +31,11 @@ private slots:
     void on_newWorldButton_clicked();
 
     void on_startStopButton_clicked();
+
+    void updateLabels(uint tern,uint ternDuration,uint alive,uint dead);
+
+
+    void on_skipReplotCheck_clicked(bool checked);
 
 private:
     Ui::MainWindow *ui;
