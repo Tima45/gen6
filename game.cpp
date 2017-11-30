@@ -13,9 +13,17 @@ void Game::tern()
 {
     lastTime = QTime::currentTime();
     //-------------------------------------------
-    this->thread()->msleep(50);
+    for(unsigned short y = 0; y < worldHeight; y++){
+        for(unsigned short x = 0; x < worldWidth;x++){
+            if(world[y][x]->childType == Cell::empty){
+                Empty *cell = (Empty*)world[y][x];
+                cell->mineralsGrowUp();
+            }
+        }
+    }
     //-------------------------------------------
     currentTern++;
+
     locker.lockForRead();
     if(skipDisplay){
         locker.unlock();
@@ -25,6 +33,9 @@ void Game::tern()
     }else{
         locker.unlock();
         emit updateLabels(currentTern,lastTime.msecsTo(QTime::currentTime()),aliveBots,deadBots);
+        drawWorld();
+        emit emitReplotWorld(QCustomPlot::rpQueuedRefresh);
+
     }
 }
 
@@ -32,8 +43,8 @@ void Game::resetWorld()
 {
     currentTern = 0;
     if(world != nullptr){
-        for(uint y = 0; y < worldHeight; y++){
-            for(uint x = 0; x < worldWidth; x++){
+        for(unsigned short y = 0; y < worldHeight; y++){
+            for(unsigned short x = 0; x < worldWidth; x++){
                 delete world[y][x];
             }
             delete world[y];
@@ -42,16 +53,29 @@ void Game::resetWorld()
         world = nullptr;
     }
     world = new Cell**[worldHeight];
-    for(uint y = 0; y < worldHeight; y++){
+    for(unsigned short y = 0; y < worldHeight; y++){
         world[y] = new Cell*[worldWidth];
-        for(uint x = 0; x < worldWidth; x++){
+        for(unsigned short x = 0; x < worldWidth; x++){
             world[y][x] = new Empty(x,y);
+        }
+    }
+}
+
+void Game::drawWorld()
+{
+    for(unsigned short y = 0; y < worldHeight; y++){
+        for(unsigned short x = 0; x < worldWidth;x++){
+            if(world[y][x]->childType == Cell::empty){
+                Empty *cell = (Empty*)world[y][x];
+                colorMap->data()->setCell(x,y,cell->minerals/(2.0*Empty::mineralsMax));
+            }
         }
     }
 }
 
 void Game::infinitGamePlaying()
 {
+    srand(time(NULL));
     locker.lockForRead();
     while(isPlaying){
         locker.unlock();

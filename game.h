@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QTime>
 #include <QThread>
+#include "plot/qcustomplot.h"
 #include "cell.h"
 #include "empty.h"
 
@@ -33,9 +34,12 @@ public:
     void tern();
     Cell ***world = nullptr;
     void resetWorld();
+    QCPColorMap *colorMap;
+    void drawWorld();
 
 signals:
     void updateLabels(uint currentTern,uint ternDurationMs,uint aliveBots,uint deadBots);
+    void emitReplotWorld(QCustomPlot::RefreshPriority);
 public slots:
     void infinitGamePlaying();
 };

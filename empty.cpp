@@ -8,6 +8,7 @@ float Empty::mineralsGrowSpeedMin = 0;
 
 Empty::Empty(uint x, uint y):Cell(x,y)
 {
+    childType = Cell::empty;
     randVal = 0.00001+(rand()%10000)/10000.0;
     recalculateGrowSpeed();
     recalculateLocalMineralsMax();
@@ -23,7 +24,7 @@ void Empty::setCoords(uint x, uint y)
 void Empty::mineralsGrowUp()
 {
     minerals += mineralsGrowSpeed*randVal;
-    minerals = (minerals > mineralsMax?mineralsMax:minerals);
+    minerals = (minerals > localMineralsMax?localMineralsMax:minerals);
 }
 
 void Empty::recalculateGrowSpeed()
