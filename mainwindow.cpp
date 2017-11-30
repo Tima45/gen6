@@ -34,6 +34,7 @@ void MainWindow::on_newWorldButton_clicked()
     locker.lockForWrite();
     game->isPlaying = false;
     locker.unlock();
+    this->thread()->msleep(10);
     ui->startStopButton->setText("Старт");
     game->resetWorld();
 }
@@ -65,6 +66,6 @@ void MainWindow::updateLabels(uint tern, uint ternDuration, uint alive, uint dea
 void MainWindow::on_skipReplotCheck_clicked(bool checked)
 {
     locker.lockForWrite();
-        game->skipDisplay = checked;
+    game->skipDisplay = checked;
     locker.unlock();
 }

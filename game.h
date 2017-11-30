@@ -6,18 +6,17 @@
 #include <QDebug>
 #include <QTime>
 #include <QThread>
-class Cell{
-public:
-    int a = 1;
-};
+#include "cell.h"
+#include "empty.h"
+
 class Game : public QObject
 {
     Q_OBJECT
 public:
-    static uint ternsToUpdateInSkipMode;
+    static uchar ternsToUpdateInSkipMode;
 
-    static uint worldWidth;
-    static uint worldHeight;
+    static unsigned short worldWidth;
+    static unsigned short worldHeight;
 
     explicit Game(QObject *parent = 0);
     QReadWriteLock locker;

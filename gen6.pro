@@ -26,10 +26,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp\
         mainwindow.cpp \
     plot/qcustomplot.cpp \
-    game.cpp
+    game.cpp \
+    cell.cpp \
+    empty.cpp
 
 HEADERS  += mainwindow.h \
     plot/qcustomplot.h \
-    game.h
+    game.h \
+    cell.h \
+    empty.h
 
 FORMS    += mainwindow.ui

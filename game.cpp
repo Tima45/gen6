@@ -1,8 +1,8 @@
 #include "game.h"
 
-uint Game::ternsToUpdateInSkipMode = 64;
-uint Game::worldWidth = 500;
-uint Game::worldHeight = 500;
+uchar Game::ternsToUpdateInSkipMode = 64;
+unsigned short Game::worldWidth = 512;
+unsigned short Game::worldHeight = 512;
 
 Game::Game(QObject *parent) : QObject(parent)
 {
@@ -45,8 +45,7 @@ void Game::resetWorld()
     for(uint y = 0; y < worldHeight; y++){
         world[y] = new Cell*[worldWidth];
         for(uint x = 0; x < worldWidth; x++){
-            world[y][x] = new Cell();
-            world[y][x]->a = (x+1)*(y+1);
+            world[y][x] = new Empty(x,y);
         }
     }
 }
