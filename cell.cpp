@@ -15,9 +15,3 @@ Cell::~Cell()
 {
 
 }
-
-void Cell::clearCell()
-{
-    x = 0;
-    y = 0;
-}

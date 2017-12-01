@@ -24,6 +24,7 @@ public:
     void recalculateLocalMineralsMax();
 
     float randVal = 0;
+    void clearCell();
 };
 
 #endif // EMPTY_H

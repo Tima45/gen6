@@ -36,8 +36,8 @@ public:
     void tern();
     Cell ***world = nullptr;
 
-    QStack<Bot*> BotHell;
-    QStack<Empty*> EmptyHell;
+    QStack<Bot*> botHell;
+    QStack<Empty*> emptyHell;
 
     void resetWorld();
     QCPColorMap *colorMap;

@@ -15,7 +15,6 @@ public:
     unsigned short x;
     unsigned short y;
     ChildType childType;
-
 };
 
 #endif // CELL_H
