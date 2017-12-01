@@ -6,9 +6,11 @@
 #include <QDebug>
 #include <QTime>
 #include <QThread>
+#include <QStack>
 #include "plot/qcustomplot.h"
 #include "cell.h"
 #include "empty.h"
+#include "bot.h"
 
 class Game : public QObject
 {
@@ -33,6 +35,10 @@ public:
     QTime lastTime;
     void tern();
     Cell ***world = nullptr;
+
+    QStack<Bot*> BotHell;
+    QStack<Empty*> EmptyHell;
+
     void resetWorld();
     QCPColorMap *colorMap;
     void drawWorld();

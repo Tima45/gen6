@@ -28,12 +28,14 @@ SOURCES += main.cpp\
     plot/qcustomplot.cpp \
     game.cpp \
     cell.cpp \
-    empty.cpp
+    empty.cpp \
+    bot.cpp
 
 HEADERS  += mainwindow.h \
     plot/qcustomplot.h \
     game.h \
     cell.h \
-    empty.h
+    empty.h \
+    bot.h
 
 FORMS    += mainwindow.ui

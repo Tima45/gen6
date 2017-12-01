@@ -6,7 +6,12 @@ unsigned short Game::worldHeight = 512;
 
 Game::Game(QObject *parent) : QObject(parent)
 {
-
+    botHell.reserve(worldWidth*worldHeight);
+    emptyHell.reserve(worldWidth*worldHeight);
+    for(int i = 0; i < worldWidth*worldHeight; i++){
+        botHell.push(new Bot(0,0));
+        emptyHell.push(new Empty(0,0));
+    }
 }
 
 void Game::tern()
@@ -42,15 +47,17 @@ void Game::tern()
 void Game::resetWorld()
 {
     currentTern = 0;
-    if(world != nullptr){
+    if(world == nullptr){
         for(unsigned short y = 0; y < worldHeight; y++){
+            world[y] = new Cell*[worldWidth];
             for(unsigned short x = 0; x < worldWidth; x++){
-                delete world[y][x];
+                Empty *cell = emptyHell.pop();
+                cell->setCoords(x,y);
+                cell->recalculateGrowSpeed();
+                cell->recalculateLocalMineralsMax();
+                world[y][x] = cell;
             }
-            delete world[y];
         }
-        delete world;
-        world = nullptr;
     }
     world = new Cell**[worldHeight];
     for(unsigned short y = 0; y < worldHeight; y++){

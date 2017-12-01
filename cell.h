@@ -6,15 +6,16 @@ class Cell
 {
 public:
     enum ChildType{
-        empty = 0,
-        bot = 1
+        empty,
+        bot
     };
-    Cell(uint x,uint y);
-    void setCoords(uint x,uint y);
+    Cell(unsigned short x,unsigned short y);
+    void setCoords(unsigned short x,unsigned short y);
     virtual ~Cell();
-    uint x;
-    uint y;
+    unsigned short x;
+    unsigned short y;
     ChildType childType;
+
 };
 
 #endif // CELL_H

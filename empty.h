@@ -13,8 +13,8 @@ public:
     static float mineralsGrowSpeedMax;
     static float mineralsGrowSpeedMin;
 
-    Empty(uint x,uint y);
-    void setCoords(uint x,uint y);
+    Empty(unsigned short x,unsigned short y);
+    void setCoords(unsigned short x,unsigned short y);
     float minerals;
     void mineralsGrowUp();
 

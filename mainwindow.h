@@ -5,7 +5,6 @@
 #include <QDebug>
 #include <QThread>
 #include <QReadWriteLock>
-#include <QTimer>
 #include "plot/qcustomplot.h"
 #include "game.h"
 
@@ -28,7 +27,6 @@ public:
     QCPColorGradient commandsGradient;
 
     void initPlot();
-    QTimer *timer;
 signals:
     void startGame();
 
@@ -42,7 +40,6 @@ private slots:
 
 
     void on_skipReplotCheck_clicked(bool checked);
-    void fps();
 
 private:
     Ui::MainWindow *ui;
