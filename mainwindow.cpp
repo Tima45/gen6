@@ -1,23 +1,35 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     initPlot();
+    ui->emptyGroupBox->setVisible(false);
+    ui->botGroupBox->setVisible(false);
 
     gameThread = new QThread;
     game = new Game;
     game->colorMap = colorMap;
     game->moveToThread(gameThread);
+
     connect(this,SIGNAL(startGame()),game,SLOT(infinitGamePlaying()),Qt::QueuedConnection);
-    connect(game,SIGNAL(updateLabels(uint,uint,uint,uint)),this,SLOT(updateLabels(uint,uint,uint,uint)),Qt::QueuedConnection);
+    connect(this,SIGNAL(playOneTern()),game,SLOT(playOneTern()),Qt::QueuedConnection);
+    connect(game,SIGNAL(updateLabels(uint,uint,uint)),this,SLOT(updateLabels(uint,uint,uint)),Qt::QueuedConnection);
     qRegisterMetaType<QCustomPlot::RefreshPriority>("QCustomPlot::RefreshPriority");
     connect(game,SIGNAL(emitReplotWorld(QCustomPlot::RefreshPriority)),ui->worldPlot,SLOT(replot(QCustomPlot::RefreshPriority)),Qt::QueuedConnection);
+
     gameThread->start();
     game->resetWorld();
+
+
+    fpsTimer = new QTimer;
+    fpsTimer->setInterval(250);
+    connect(fpsTimer,SIGNAL(timeout()),this,SLOT(fpsCount()));
+    fpsTimer->start();
 }
 
 MainWindow::~MainWindow()
@@ -29,6 +41,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::initPlot()
 {
+    ui->worldPlot->addLayer("low");
+    ui->worldPlot->addLayer("mid");
+    ui->worldPlot->addLayer("top");
+
+
     //ui->worldPlot->setOpenGl(true,1);
     ui->worldPlot->setNoAntialiasingOnDrag(true);
     ui->worldPlot->setInteraction(QCP::iRangeDrag, true);
@@ -39,7 +56,7 @@ void MainWindow::initPlot()
     QSharedPointer<QCPAxisTickerFixed> fixedTicker(new QCPAxisTickerFixed);
     fixedTicker->setTickCount(Game::worldWidth);
     fixedTicker->setTickOrigin(0);
-    fixedTicker->setTickStep(Game::worldHeight); // tick step shall be 1.0
+    fixedTicker->setTickStep(Game::worldWidth);
     fixedTicker->setScaleStrategy(QCPAxisTickerFixed::ssNone); // and no scaling of the tickstep e.commandsGradient. multiples are allowed
 
     ui->worldPlot->xAxis->setRange(0,Game::worldWidth);
@@ -52,20 +69,94 @@ void MainWindow::initPlot()
 
     //-----------------------------------------------------------------------
     colorMap = new QCPColorMap(ui->worldPlot->xAxis,ui->worldPlot->yAxis);
-    colorMap->data()->setSize(Game::worldHeight,Game::worldWidth);
-    colorMap->data()->setRange(QCPRange(0,Game::worldWidth),QCPRange(0,Game::worldHeight));
+    colorMap->setLayer("low");
+    colorMap->data()->setSize(Game::worldWidth,Game::worldHeight);
+    colorMap->data()->setRange(QCPRange(0,Game::worldWidth-1),QCPRange(0,Game::worldHeight-1));
+/*
+    for(int y = 0; y < Game::worldHeight; y++){
+        for(int x = 0; x < Game::worldWidth; x++){
+            colorMap->data()->setCell(x,y,rand()%RAND_MAX);
+        }
+    }*/
     colorMap->setInterpolate(false);
+    colorMap->setAntialiased(false);
+    colorMap->setAntialiasedFill(false);
+    colorMap->setAntialiasedScatters(false);
     //-----------------------------------------------------------------------
     commandsGradient.clearColorStops();
     commandsGradient.setColorInterpolation(QCPColorGradient::ColorInterpolation::ciRGB);
-    commandsGradient.setColorStopAt(0,QColor(255,255,255));    //minerals
-    commandsGradient.setColorStopAt(0.5,QColor(150,150,255));
+    commandsGradient.setColorStopAt(DoubleColors::MineralsMinColor,QColor(255,255,255));    //minerals
+    commandsGradient.setColorStopAt(DoubleColors::MineralsMaxColor,QColor(128,128,255));
+    commandsGradient.setColorStopAt(DoubleColors::StandingColor,QColor(180,180,180));
+    commandsGradient.setColorStopAt(DoubleColors::DeadBotColor,QColor(139,94,73));
+    commandsGradient.setColorStopAt(DoubleColors::PhotoUserMinColor,QColor(0,255,0));
+    commandsGradient.setColorStopAt(DoubleColors::PhotoUserMaxColor,QColor(10,128,10));
+    commandsGradient.setColorStopAt(DoubleColors::MineralsUserMinColor,QColor(100,200,255));
+    commandsGradient.setColorStopAt(DoubleColors::MineralsUserMaxColor,QColor(0,0,200));
+    commandsGradient.setColorStopAt(DoubleColors::TallowUserMinColor,QColor(255,128,128));
+    commandsGradient.setColorStopAt(DoubleColors::TallowUserMaxColor,QColor(255,10,50));
+
+    energyGradient.clearColorStops();
+    energyGradient.setColorInterpolation(QCPColorGradient::ColorInterpolation::ciRGB);
+    energyGradient.setColorStopAt(DoubleColors::MineralsMinColor,QColor(255,255,255));
+    energyGradient.setColorStopAt(DoubleColors::MineralsMaxColor,QColor(128,128,255));
+    energyGradient.setColorStopAt(DoubleColors::StandingColor,QColor(180,180,180));
+    energyGradient.setColorStopAt(DoubleColors::DeadBotColor,QColor(139,94,73));
+    energyGradient.setColorStopAt(DoubleColors::BotEnergyMaxColor,QColor(255,255,0));
+    energyGradient.setColorStopAt(DoubleColors::BotEnergyMinColor,QColor(175,68,15));
+
+    genomdiffGradient.clearColorStops();
+    genomdiffGradient.setColorInterpolation(QCPColorGradient::ColorInterpolation::ciRGB);
+    genomdiffGradient.setColorStopAt(DoubleColors::MineralsMinColor,QColor(255,255,255));
+    genomdiffGradient.setColorStopAt(DoubleColors::MineralsMaxColor,QColor(128,128,255));
+    genomdiffGradient.setColorStopAt(DoubleColors::StandingColor,QColor(180,180,180));
+    genomdiffGradient.setColorStopAt(DoubleColors::DeadBotColor,QColor(139,94,73));
+    genomdiffGradient.setColorStopAt(DoubleColors::GenomDifferenceMaxColor,QColor(255,0,0));
+    genomdiffGradient.setColorStopAt(DoubleColors::GenomDifferenceMinColor,QColor(0,255,0));
     //-------
     colorMap->setGradient(commandsGradient);
     colorMap->data()->setCell(0,0,0);
     colorMap->data()->setCell(0,1,1);
     colorMap->rescaleDataRange(true);
+
+
+
+    cursor = new QCPItemRect(ui->worldPlot);
+    cursor->setLayer("mid");
+    cursor->setAntialiased(false);
+    QPen p(QColor(255,10,50,200));
+    p.setWidth(3);
+    cursor->setPen(p);
+    cursor->setVisible(false);
+
+    traceLeftTop = new QCPItemTracer(ui->worldPlot);
+    traceLeftTop->setLayer("mid");
+
+    traceRightBottom = new QCPItemTracer(ui->worldPlot);
+    traceRightBottom->setLayer("mid");
+
+    QPen pt(QColor(10,10,255,100));
+    pt.setStyle(Qt::DashLine);
+    traceLeftTop->setPen(pt);
+    traceRightBottom->setPen(pt);
+
+
+    traceLeftTop->setVisible(false);
+    traceRightBottom->setVisible(false);
+
+
     ui->worldPlot->replot();
+    //connect(ui->worldPlot->xAxis,SIGNAL(rangeChanged(QCPRange)),this,SLOT(rangeLimitation(QCPRange)));
+    //connect(ui->worldPlot->yAxis,SIGNAL(rangeChanged(QCPRange)),this,SLOT(rangeLimitation(QCPRange)));
+
+    connect(ui->worldPlot,SIGNAL(mouseDoubleClick(QMouseEvent*)),this,SLOT(handleMouseClicking(QMouseEvent*)));
+
+    ui->worldPlot->moveLayer(ui->worldPlot->layer("grid"),ui->worldPlot->layer("top"));
+
+    aliveGraph = ui->aliveDeadPlot->addGraph();
+    deadGraph = ui->aliveDeadPlot->addGraph();
+    aliveGraph->setPen(QPen(QColor(Qt::green)));
+    deadGraph->setPen(QPen(QColor(139,94,73)));
 }
 
 void MainWindow::on_newWorldButton_clicked()
@@ -75,7 +166,11 @@ void MainWindow::on_newWorldButton_clicked()
     locker.unlock();
     this->thread()->msleep(10);
     ui->startStopButton->setText("Старт");
-    game->resetWorld();
+    if(QMessageBox::question(this,"Старт нового мира","Это приведет к удалению текущего мира. Удалять?") == QMessageBox::Yes){
+        game->resetWorld();
+        game->drawWorld();
+        ui->worldPlot->replot();
+    }
 }
 
 void MainWindow::on_startStopButton_clicked()
@@ -92,12 +187,43 @@ void MainWindow::on_startStopButton_clicked()
     locker.unlock();
 }
 
-void MainWindow::updateLabels(uint tern, uint ternDuration, uint alive, uint dead)
+void MainWindow::updateLabels(uint tern, uint alive, uint dead)
 {
     ui->ternLabel->setText(QString::number(tern));
-    ui->ternsPerSecondLabel->setText(QString::number(qRound(1000.0/ternDuration)));
     ui->aliveCountLabel->setText(QString::number(alive));
     ui->deadCountLabel->setText(QString::number(dead));
+    aliveGraph->addData(tern,alive);
+    deadGraph->addData(tern,dead);
+    ui->aliveDeadPlot->replot();
+    ui->aliveDeadPlot->rescaleAxes();
+
+    if(tracking){
+        if(trackingCell->tracking){
+            if(trackingCell->childType == Cell::empty){
+                Empty *cell = (Empty*)trackingCell;
+                ui->mineralsLabel->setText(QString::number(cell->minerals));
+                ui->xLabel->setText(QString::number(cell->x));
+                ui->yLabel->setText(QString::number(cell->y));
+            }
+
+            if(trackingCell->childType == Cell::bot){
+                displayBotInfo((Bot*)trackingCell);
+            }
+
+
+            cursor->topLeft->setCoords(trackingCell->x-0.5,trackingCell->y+0.5);
+            cursor->bottomRight->setCoords(trackingCell->x+0.5,trackingCell->y-0.5);
+
+            traceLeftTop->position->setCoords(trackingCell->x-0.5,trackingCell->y+0.5);
+            traceRightBottom->position->setCoords(trackingCell->x+0.5,trackingCell->y-0.5);
+
+        }else{
+            tracking = false;
+            cursor->setVisible(false);
+            traceLeftTop->setVisible(false);
+            traceRightBottom->setVisible(false);
+        }
+    }
 }
 
 void MainWindow::on_skipReplotCheck_clicked(bool checked)
@@ -105,4 +231,118 @@ void MainWindow::on_skipReplotCheck_clicked(bool checked)
     locker.lockForWrite();
     game->skipDisplay = checked;
     locker.unlock();
+}
+
+void MainWindow::fpsCount()
+{
+    locker.lockForRead();
+    int newFps = game->currentTern;
+    locker.unlock();
+    ui->ternsPerSecondLabel->setText(QString::number((newFps-lastFps)*4.0));
+    lastFps = newFps;
+}
+
+void MainWindow::rangeLimitation(QCPRange newRange)
+{
+    if(newRange.lower < -50 || newRange.upper > Game::worldWidth+50){
+        ui->worldPlot->xAxis->setRange(QCPRange(0,Game::worldWidth));
+        ui->worldPlot->yAxis->setRange(QCPRange(0,Game::worldHeight));
+    }
+}
+
+void MainWindow::handleMouseClicking(QMouseEvent *event)
+{
+    int x = qRound(ui->worldPlot->xAxis->pixelToCoord(event->x()));
+    int y = qRound(ui->worldPlot->yAxis->pixelToCoord(event->y()));
+    if(x < Game::worldWidth && y < Game::worldHeight && x >= 0 && y >= 0){
+        trackingCell = game->world[y][x];
+        tracking = true;
+        trackingCell->tracking = true;
+        if(trackingCell->childType == Cell::empty){
+            Empty *cell = (Empty*)trackingCell;
+            ui->emptyGroupBox->setVisible(true);
+            ui->botGroupBox->setVisible(false);
+            //ui->trackingGroupBox->setTitle("Пустота");
+            ui->mineralsLabel->setText(QString::number(cell->minerals));
+            ui->xLabel->setText(QString::number(x));
+            ui->yLabel->setText(QString::number(y));
+        }
+        if(trackingCell->childType == Cell::bot){
+            ui->emptyGroupBox->setVisible(false);
+            ui->botGroupBox->setVisible(true);
+            displayBotInfo((Bot*)trackingCell);
+        }
+        cursor->setVisible(true);
+        cursor->topLeft->setCoords(x-0.5,y+0.5);
+        cursor->bottomRight->setCoords(x+0.5,y-0.5);
+        traceLeftTop->position->setCoords(x-0.5,y+0.5);
+        traceRightBottom->position->setCoords(x+0.5,y-0.5);
+
+        traceLeftTop->setVisible(true);
+        traceRightBottom->setVisible(true);
+    }
+}
+
+void MainWindow::on_comboBox_currentIndexChanged(int index)
+{
+    locker.lockForWrite();
+    game->displayMode = (Game::DisplayMode)index;
+    locker.unlock();
+    switch(index){
+        case 0:{
+            colorMap->setGradient(commandsGradient);
+            break;
+        }
+        case 1:{
+            colorMap->setGradient(energyGradient);
+            break;
+        }
+        case 2:{
+            colorMap->setGradient(genomdiffGradient);
+            break;
+        }
+    }
+    if(!game->isPlaying){
+        game->drawWorld();
+        ui->worldPlot->replot();
+    }
+
+
+}
+
+void MainWindow::on_rescaleButton_clicked()
+{
+    ui->worldPlot->xAxis->setRange(0,Game::worldWidth);
+    ui->worldPlot->yAxis->setRange(0,Game::worldHeight);
+}
+
+void MainWindow::on_nextTernButton_clicked()
+{
+    game->isPlaying = false;
+    emit playOneTern();
+    ui->startStopButton->setText("Старт");;
+}
+
+void MainWindow::displayBotInfo(Bot *bot)
+{
+    ui->xLabel->setText(QString::number(bot->x));
+    ui->yLabel->setText(QString::number(bot->y));
+    ui->healthLabel->setText(QString::number(bot->health));
+    ui->energyLabel->setText(QString::number(bot->energy));
+    ui->carrySugarLabel->setText(QString::number(bot->carrySugar));
+    ui->carryMineralsLabel->setText(QString::number(bot->carryMinerals));
+    ui->carryTallowLabel->setText(QString::number(bot->carryTallow));
+    ui->eatMineralsLabel->setText(QString::number(bot->eatMineralsKof));
+    ui->eatSugarLabel->setText(QString::number(bot->eatSugarKof));
+    ui->eatTallowLabel->setText(QString::number(bot->eatTallowKof));
+    ui->useMineralsLabel->setText(QString::number(bot->useMineralsKof));
+    ui->useSugarLabel->setText(QString::number(bot->useSugarKof));
+    ui->useTallowLabel->setText(QString::number(bot->useTallowKof));
+    ui->shareMineralsLabel->setText(QString::number(bot->shareMineralsKof));
+    ui->shareSugarLabel->setText(QString::number(bot->shareSugarKof));
+    ui->shareTallowLabel->setText(QString::number(bot->shareTallowKof));
+    ui->defenceLabel->setText(QString::number(bot->defenceMinerals/(10+bot->defenceMinerals)));
+    ui->longLiveLabel->setText(QString::number(bot->longLiveSugar/(10+bot->longLiveSugar)));
+    ui->lifeTimeLabel->setText(QString::number(bot->ternCount));
+
 }

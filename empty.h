@@ -2,7 +2,7 @@
 #define EMPTY_H
 
 #include "cell.h"
-#include "game.h"
+#include "bot.h"
 
 class Empty : public Cell
 {
@@ -13,15 +13,23 @@ public:
     static float mineralsGrowSpeedMax;
     static float mineralsGrowSpeedMin;
 
+    static float produciveProbabilityMax;
+    static float produciveProbabilityMin;
+
+    static float mineralsGrowBorder;
+
+    Empty();
     Empty(unsigned short x,unsigned short y);
     void setCoords(unsigned short x,unsigned short y);
+    bool producive = false;
     float minerals;
     void mineralsGrowUp();
 
     float localMineralsMax;
     float mineralsGrowSpeed;
-    void recalculateGrowSpeed();
-    void recalculateLocalMineralsMax();
+    void recalculateGrowSpeed(float awayFromCenter);
+    void recalculateLocalMineralsMax(float awayFromCenter);
+    void recalculateProductivable();
 
     float randVal = 0;
     void clearCell();
