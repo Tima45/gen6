@@ -9,6 +9,9 @@
 #include "game.h"
 #include "doublecolors.h"
 #include <QTimer>
+#include <QListWidgetItem>
+#include "worldparametersdialog.h"
+
 
 namespace Ui {
 class MainWindow;
@@ -37,6 +40,7 @@ public:
     QCPItemRect *cursor;
     QCPItemTracer *traceLeftTop;
     QCPItemTracer *traceRightBottom;
+    QCPItemLine *dirArrow;
 
     QCPGraph *aliveGraph;
     QCPGraph *deadGraph;
@@ -71,6 +75,8 @@ private slots:
 
     void on_nextTernButton_clicked();
     void displayBotInfo(Bot*bot);
+
+    void on_worldParameternsButton_clicked();
 
 private:
     Ui::MainWindow *ui;

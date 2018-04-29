@@ -4,13 +4,13 @@
 float Empty::mineralsMax = 200;
 float Empty::mineralsMin = 0;
 
-float Empty::mineralsGrowSpeedMax = 0.1;
+float Empty::mineralsGrowSpeedMax = 1;
 float Empty::mineralsGrowSpeedMin = 0;
 
 float Empty::produciveProbabilityMax = 0.5;
 float Empty::produciveProbabilityMin = 0.1;
 
-float Empty::mineralsGrowBorder = 50;
+float Empty::mineralsGrowBorder = 100;
 
 
 

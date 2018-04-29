@@ -24,12 +24,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
     gameThread->start();
     game->resetWorld();
+    game->drawWorld();
 
 
     fpsTimer = new QTimer;
     fpsTimer->setInterval(250);
     connect(fpsTimer,SIGNAL(timeout()),this,SLOT(fpsCount()));
     fpsTimer->start();
+
 }
 
 MainWindow::~MainWindow()
@@ -87,13 +89,13 @@ void MainWindow::initPlot()
     commandsGradient.setColorInterpolation(QCPColorGradient::ColorInterpolation::ciRGB);
     commandsGradient.setColorStopAt(DoubleColors::MineralsMinColor,QColor(255,255,255));    //minerals
     commandsGradient.setColorStopAt(DoubleColors::MineralsMaxColor,QColor(128,128,255));
-    commandsGradient.setColorStopAt(DoubleColors::StandingColor,QColor(180,180,180));
+    commandsGradient.setColorStopAt(DoubleColors::StandingColor,QColor(69,69,69));
     commandsGradient.setColorStopAt(DoubleColors::DeadBotColor,QColor(139,94,73));
-    commandsGradient.setColorStopAt(DoubleColors::PhotoUserMinColor,QColor(0,255,0));
-    commandsGradient.setColorStopAt(DoubleColors::PhotoUserMaxColor,QColor(10,128,10));
-    commandsGradient.setColorStopAt(DoubleColors::MineralsUserMinColor,QColor(100,200,255));
-    commandsGradient.setColorStopAt(DoubleColors::MineralsUserMaxColor,QColor(0,0,200));
-    commandsGradient.setColorStopAt(DoubleColors::TallowUserMinColor,QColor(255,128,128));
+    commandsGradient.setColorStopAt(DoubleColors::PhotoUserMinColor,QColor(69,69,69));
+    commandsGradient.setColorStopAt(DoubleColors::PhotoUserMaxColor,QColor(0,180,50));
+    commandsGradient.setColorStopAt(DoubleColors::MineralsUserMinColor,QColor(69,69,69));
+    commandsGradient.setColorStopAt(DoubleColors::MineralsUserMaxColor,QColor(20,20,255));
+    commandsGradient.setColorStopAt(DoubleColors::TallowUserMinColor,QColor(69,69,69));
     commandsGradient.setColorStopAt(DoubleColors::TallowUserMaxColor,QColor(255,10,50));
 
     energyGradient.clearColorStops();
@@ -135,7 +137,10 @@ void MainWindow::initPlot()
     traceRightBottom = new QCPItemTracer(ui->worldPlot);
     traceRightBottom->setLayer("mid");
 
+
+
     QPen pt(QColor(10,10,255,100));
+    p.setWidth(1);
     pt.setStyle(Qt::DashLine);
     traceLeftTop->setPen(pt);
     traceRightBottom->setPen(pt);
@@ -143,6 +148,12 @@ void MainWindow::initPlot()
 
     traceLeftTop->setVisible(false);
     traceRightBottom->setVisible(false);
+
+    dirArrow = new QCPItemLine(ui->worldPlot);
+    dirArrow->setPen(p);
+    dirArrow->setLayer("mid");
+    dirArrow->setVisible(false);
+    dirArrow->setHead(QCPLineEnding::esSpikeArrow);
 
 
     ui->worldPlot->replot();
@@ -171,6 +182,8 @@ void MainWindow::on_newWorldButton_clicked()
         game->drawWorld();
         ui->worldPlot->replot();
     }
+    aliveGraph->data()->clear();
+    deadGraph->data()->clear();
 }
 
 void MainWindow::on_startStopButton_clicked()
@@ -208,6 +221,55 @@ void MainWindow::updateLabels(uint tern, uint alive, uint dead)
 
             if(trackingCell->childType == Cell::bot){
                 displayBotInfo((Bot*)trackingCell);
+
+                switch (((Bot*)trackingCell)->direction) {
+                    case Bot::RIGHT:{
+                        dirArrow->start->setCoords(trackingCell->x-0.5,trackingCell->y);
+                        dirArrow->end->setCoords(trackingCell->x+0.5,trackingCell->y);
+                        break;
+                    }
+                    case Bot::UPRIGHT:{
+                        dirArrow->start->setCoords(trackingCell->x-0.5,trackingCell->y-0.5);
+                        dirArrow->end->setCoords(trackingCell->x+0.5,trackingCell->y+0.5);
+                        break;
+                    }
+                    case Bot::UP:{
+                        dirArrow->start->setCoords(trackingCell->x,trackingCell->y-0.5);
+                        dirArrow->end->setCoords(trackingCell->x,trackingCell->y+0.5);
+                        break;
+                    }
+                    case Bot::UPLEFT:{
+                        dirArrow->start->setCoords(trackingCell->x+0.5,trackingCell->y-0.5);
+                        dirArrow->end->setCoords(trackingCell->x-0.5,trackingCell->y+0.5);
+                        break;
+                    }
+                    case Bot::LEFT:{
+                        dirArrow->start->setCoords(trackingCell->x+0.5,trackingCell->y);
+                        dirArrow->end->setCoords(trackingCell->x-0.5,trackingCell->y);
+                        break;
+                    }
+                    case Bot::DOWNLEFT:{
+                        dirArrow->start->setCoords(trackingCell->x+0.5,trackingCell->y+0.5);
+                        dirArrow->end->setCoords(trackingCell->x-0.5,trackingCell->y-0.5);
+                        break;
+                    }
+                    case Bot::DOWN:{
+                        dirArrow->start->setCoords(trackingCell->x,trackingCell->y+0.5);
+                        dirArrow->end->setCoords(trackingCell->x,trackingCell->y-0.5);
+                        break;
+                    }
+                    case Bot::DOWNRIGHT:{
+                        dirArrow->start->setCoords(trackingCell->x-0.5,trackingCell->y+0.5);
+                        dirArrow->end->setCoords(trackingCell->x+0.5,trackingCell->y-0.5);
+                        break;
+                    }
+                    default:{
+                        break;
+                    }
+                }
+                dirArrow->setVisible(true);
+
+
             }
 
 
@@ -222,6 +284,7 @@ void MainWindow::updateLabels(uint tern, uint alive, uint dead)
             cursor->setVisible(false);
             traceLeftTop->setVisible(false);
             traceRightBottom->setVisible(false);
+            dirArrow->setVisible(false);
         }
     }
 }
@@ -266,17 +329,66 @@ void MainWindow::handleMouseClicking(QMouseEvent *event)
             ui->mineralsLabel->setText(QString::number(cell->minerals));
             ui->xLabel->setText(QString::number(x));
             ui->yLabel->setText(QString::number(y));
+            dirArrow->setVisible(false);
         }
         if(trackingCell->childType == Cell::bot){
             ui->emptyGroupBox->setVisible(false);
             ui->botGroupBox->setVisible(true);
             displayBotInfo((Bot*)trackingCell);
+
+            switch (((Bot*)trackingCell)->direction) {
+                case Bot::RIGHT:{
+                    dirArrow->start->setCoords(x-0.5,y);
+                    dirArrow->end->setCoords(x+0.5,y);
+                    break;
+                }
+                case Bot::UPRIGHT:{
+                    dirArrow->start->setCoords(x-0.5,y-0.5);
+                    dirArrow->end->setCoords(x+0.5,y+0.5);
+                    break;
+                }
+                case Bot::UP:{
+                    dirArrow->start->setCoords(x,y-0.5);
+                    dirArrow->end->setCoords(x,y+0.5);
+                    break;
+                }
+                case Bot::UPLEFT:{
+                    dirArrow->start->setCoords(x+0.5,y-0.5);
+                    dirArrow->end->setCoords(x-0.5,y+0.5);
+                    break;
+                }
+                case Bot::LEFT:{
+                    dirArrow->start->setCoords(x+0.5,y);
+                    dirArrow->end->setCoords(x-0.5,y);
+                    break;
+                }
+                case Bot::DOWNLEFT:{
+                    dirArrow->start->setCoords(x+0.5,y+0.5);
+                    dirArrow->end->setCoords(x-0.5,y-0.5);
+                    break;
+                }
+                case Bot::DOWN:{
+                    dirArrow->start->setCoords(x,y+0.5);
+                    dirArrow->end->setCoords(x,y-0.5);
+                    break;
+                }
+                case Bot::DOWNRIGHT:{
+                    dirArrow->start->setCoords(x-0.5,y+0.5);
+                    dirArrow->end->setCoords(x+0.5,y-0.5);
+                    break;
+                }
+                default:{
+                    break;
+                }
+            }
+            dirArrow->setVisible(true);
         }
         cursor->setVisible(true);
         cursor->topLeft->setCoords(x-0.5,y+0.5);
         cursor->bottomRight->setCoords(x+0.5,y-0.5);
         traceLeftTop->position->setCoords(x-0.5,y+0.5);
         traceRightBottom->position->setCoords(x+0.5,y-0.5);
+
 
         traceLeftTop->setVisible(true);
         traceRightBottom->setVisible(true);
@@ -341,8 +453,48 @@ void MainWindow::displayBotInfo(Bot *bot)
     ui->shareMineralsLabel->setText(QString::number(bot->shareMineralsKof));
     ui->shareSugarLabel->setText(QString::number(bot->shareSugarKof));
     ui->shareTallowLabel->setText(QString::number(bot->shareTallowKof));
-    ui->defenceLabel->setText(QString::number(bot->defenceMinerals/(10+bot->defenceMinerals)));
+    ui->defenceLabel->setText(QString::number(bot->defenceMinerals/(1+bot->defenceMinerals)));
     ui->longLiveLabel->setText(QString::number(bot->longLiveSugar/(10+bot->longLiveSugar)));
     ui->lifeTimeLabel->setText(QString::number(bot->ternCount));
+    ui->cloneCountLabel->setText(QString::number(bot->cloneCount));
+    ui->killCountLabel->setText(QString::number(bot->killCount));
 
+
+    ui->genomIndexLabel->setText(QString::number(bot->genomIndex));
+    ui->genomList->clear();
+    for(uchar i = 0; i < Bot::genomSize; i++){
+        ui->genomList->addItem(QString::number(i)+": "+Bot::genomCommandsToString((Bot::GenomCommands)bot->genom[i]));
+
+        if(bot->genom[i] == Bot::PHOTO || bot->genom[i] == Bot::EATSUGAR || bot->genom[i] == Bot::SHARESUGAR || bot->genom[i] == Bot::USESUGAR){
+            ui->genomList->item(ui->genomList->count()-1)->setTextColor(QColor(10,128,10));
+        }else if(bot->genom[i] == Bot::GO){
+            ui->genomList->item(ui->genomList->count()-1)->setTextColor(QColor(0,200,200));
+        }else if(bot->genom[i] == Bot::EATMINERALS || bot->genom[i] == Bot::SHAREMINERALS || bot->genom[i] == Bot::USEMINERALS){
+            ui->genomList->item(ui->genomList->count()-1)->setTextColor(QColor(0,0,255));
+        }else if(bot->genom[i] == Bot::ATTACK){
+            ui->genomList->item(ui->genomList->count()-1)->setTextColor(QColor(255,0,0));
+        }else if(bot->genom[i] == Bot::EATTALLOW || bot->genom[i] == Bot::USETALLOW || bot->genom[i] == Bot::SHARETALLOW){
+            ui->genomList->item(ui->genomList->count()-1)->setTextColor(QColor(139,94,73));
+        }else if(bot->genom[i] == Bot::CLONE){
+            ui->genomList->item(ui->genomList->count()-1)->setTextColor(QColor(200,200,0));
+        }
+        if(i == (bot->genomIndex+1)%Bot::genomSize){
+            ui->genomList->item(ui->genomList->count()-1)->setFont(QFont("Times", 10, QFont::Bold));
+        }
+    }
+
+}
+
+
+
+void MainWindow::on_worldParameternsButton_clicked()
+{
+    locker.lockForWrite();
+    game->isPlaying = false;
+    locker.unlock();
+    ui->startStopButton->setText("Старт");
+    WorldParametersDialog *dialog = new WorldParametersDialog();
+    dialog->setAttribute(Qt::WA_ShowModal);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->show();
 }

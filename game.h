@@ -29,8 +29,8 @@ public:
     static uchar ternsToUpdateInSkipMode;
 
     Cell ***world;
-    static unsigned short worldWidth;
-    static unsigned short worldHeight;
+    static const unsigned short worldWidth;
+    static const unsigned short worldHeight;
 
     explicit Game(QObject *parent = 0);
     ~Game();

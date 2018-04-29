@@ -4,8 +4,8 @@
 Game* Game::singleGame = nullptr;
 
 uchar Game::ternsToUpdateInSkipMode = 64;
-unsigned short Game::worldWidth = 300;
-unsigned short Game::worldHeight = 300;
+const unsigned short Game::worldWidth = 512;
+const unsigned short Game::worldHeight = 512;
 
 Game::Game(QObject *parent) : QObject(parent)
 {
@@ -158,54 +158,108 @@ void Game::resetWorld()
             }
         }
 
-        Bot* firstBot = botHell.takeLast();
-        for(unsigned short i = 0; i < Bot::genomSize; i++){
-            firstBot->genom[i] = Bot::STAND;
+
+        {
+            Bot* firstBot = botHell.takeLast();
+            for(unsigned short i = 0; i < Bot::genomSize; i++){
+                firstBot->genom[i] = Bot::STAND;
+            }
+
+            for(unsigned short i = 0; i < Bot::genomSize; i+=3){
+                firstBot->genom[i] = Bot::PHOTO;
+                firstBot->genom[i+1] = Bot::EATSUGAR;
+            }
+
+
+
+
+            firstBot->genomIndex = 0;
+            firstBot->ternCount = 0;
+
+            firstBot->health = 100;
+            firstBot->energy = 80;
+
+            firstBot->carryMinerals = 0;
+            firstBot->carrySugar = 0;
+            firstBot->carryTallow = 0;
+
+            firstBot->defenceMinerals = 0;
+            firstBot->longLiveSugar = 0;
+            firstBot->direction = rand()%8;
+
+            firstBot->eatMineralsKof = 1;
+            firstBot->eatSugarKof = 1;
+            firstBot->eatTallowKof = 1;
+
+            firstBot->useMineralsKof = 1;
+            firstBot->useSugarKof = 1;
+            firstBot->useTallowKof = 1;
+
+            firstBot->shareMineralsKof = 1;
+            firstBot->shareSugarKof = 1;
+            firstBot->shareTallowKof = 1;
+
+            firstBot->genomDifference = 0;
+
+            firstBot->photoUser = 0;
+            firstBot->mineralsUser = 0;
+            firstBot->tallowUser = 0;
+            firstBot->cloneCount = 0;
+            firstBot->calculateLifeStyle();
+
+            firstBot->setCoords(worldHeight/2,worldWidth/2);
+            emptyHell.append((Empty*)Game::world[worldWidth/2][worldHeight/2]);
+            Game::world[worldWidth/2][worldHeight/2] = firstBot;
         }
+        /*{
+            Bot* firstBot = botHell.takeLast();
+            for(unsigned short i = 0; i < Bot::genomSize; i++){
+                firstBot->genom[i] = Bot::GO;
+            }
 
-        for(unsigned short i = 0; i < Bot::genomSize; i+=3){
-            firstBot->genom[i] = Bot::PHOTO;
-            firstBot->genom[i+1] = Bot::EATSUGAR;
-        }
+            for(unsigned short i = 0; i < Bot::genomSize; i+=3){
+                firstBot->genom[i] = Bot::EATMINERALS;
+            }
 
 
 
-        firstBot->genomIndex = 0;
-        firstBot->ternCount = 0;
+            firstBot->genomIndex = 0;
+            firstBot->ternCount = 0;
 
-        firstBot->health = 100;
-        firstBot->energy = 80;
+            firstBot->health = 100;
+            firstBot->energy = 80;
 
-        firstBot->carryMinerals = 0;
-        firstBot->carrySugar = 0;
-        firstBot->carryTallow = 0;
+            firstBot->carryMinerals = 0;
+            firstBot->carrySugar = 0;
+            firstBot->carryTallow = 0;
 
-        firstBot->defenceMinerals = 0;
-        firstBot->longLiveSugar = 0;
-        firstBot->direction = rand()%8;
+            firstBot->defenceMinerals = 0;
+            firstBot->longLiveSugar = 0;
+            firstBot->direction = 0;
 
-        firstBot->eatMineralsKof = 1;
-        firstBot->eatSugarKof = 1;
-        firstBot->eatTallowKof = 1;
+            firstBot->eatMineralsKof = 1;
+            firstBot->eatSugarKof = 1;
+            firstBot->eatTallowKof = 1;
 
-        firstBot->useMineralsKof = 1;
-        firstBot->useSugarKof = 1;
-        firstBot->useTallowKof = 1;
+            firstBot->useMineralsKof = 1;
+            firstBot->useSugarKof = 1;
+            firstBot->useTallowKof = 1;
 
-        firstBot->shareMineralsKof = 1;
-        firstBot->shareSugarKof = 1;
-        firstBot->shareTallowKof = 1;
+            firstBot->shareMineralsKof = 1;
+            firstBot->shareSugarKof = 1;
+            firstBot->shareTallowKof = 1;
 
-        firstBot->genomDifference = 0;
+            firstBot->genomDifference = 0;
 
-        firstBot->photoUser = 0;
-        firstBot->mineralsUser = 0;
-        firstBot->tallowUser = 0;
-        firstBot->calculateLifeStyle();
+            firstBot->photoUser = 0;
+            firstBot->mineralsUser = 0;
+            firstBot->tallowUser = 0;
+            firstBot->calculateLifeStyle();
 
-        firstBot->setCoords(worldHeight/2,worldWidth/2);
-        emptyHell.append((Empty*)Game::world[worldWidth/2][worldHeight/2]);
-        Game::world[worldWidth/2][worldHeight/2] = firstBot;
+            firstBot->setCoords(400,400);
+            emptyHell.append((Empty*)Game::world[400][400]);
+            Game::world[400][400] = firstBot;
+        }*/
 
     }else{
         locker.unlock();
@@ -243,7 +297,11 @@ void Game::drawWorld()
                             break;
                         }
                         case Energy:{
-                            colorMap->data()->setCell(x,y,(bot->energy/Bot::energyMax)*(DoubleColors::BotEnergyMaxColor - DoubleColors::BotEnergyMinColor) + DoubleColors::BotEnergyMinColor);
+                            if(bot->energy > 0){
+                                colorMap->data()->setCell(x,y,(bot->energy/Bot::energyMax)*(DoubleColors::BotEnergyMaxColor - DoubleColors::BotEnergyMinColor) + DoubleColors::BotEnergyMinColor);
+                            }else{
+                                colorMap->data()->setCell(x,y,DoubleColors::BotEnergyMinColor);
+                            }
                             break;
                         }
                         case Genomdiff:{

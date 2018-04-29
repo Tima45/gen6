@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl
+QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
@@ -16,7 +16,7 @@ TEMPLATE = app
 # depend on your compiler). Please consult the documentation of the
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
-DEFINES += QCUSTOMPLOT_USE_OPENGL
+#DEFINES += QCUSTOMPLOT_USE_OPENGL
 
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -31,7 +31,8 @@ SOURCES += main.cpp\
     cell.cpp \
     empty.cpp \
     bot.cpp \
-    doublecolors.cpp
+    doublecolors.cpp \
+    worldparametersdialog.cpp
 
 HEADERS  += mainwindow.h \
     plot/qcustomplot.h \
@@ -39,7 +40,14 @@ HEADERS  += mainwindow.h \
     cell.h \
     empty.h \
     bot.h \
-    doublecolors.h
+    doublecolors.h \
+    worldparametersdialog.h
 
-FORMS    += mainwindow.ui
-LIBS += -lopengl32
+FORMS    += mainwindow.ui \
+    worldparametersdialog.ui
+
+RC_FILE = icon.rc
+
+RESOURCES += \
+    pics.qrc
+

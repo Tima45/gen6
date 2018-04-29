@@ -9,7 +9,7 @@ uchar Bot::tolerance = 2;
 
 float Bot::photoSugarMax = 5;
 float Bot::photoSugarMin = 0;
-float Bot::photoSugarBorder = 100;
+float Bot::photoSugarBorder = 256;
 
 float Bot::sugarToEnergyKof = 1;
 float Bot::mineralsToEnergyKof = 1;
@@ -19,7 +19,7 @@ float Bot::tallowToHealthKof = 1;
 float Bot::everyTernCost = 0.1;
 uint Bot::botsliveTime = 100;
 
-float Bot::oldCost = 10;
+float Bot::oldCost = 0.5;
 
 float Bot::defenceCoolDown = 0.1;
 float Bot::longLiveCoolDown = 0.1;
@@ -31,7 +31,7 @@ float Bot::tallowFromDead = 15;
 float Bot::moveCost = 1;
 float Bot::attackCost = 5;
 float Bot::photoCost = 0.2;
-float Bot::damage = 75;
+float Bot::damage = 100;
 float Bot::minEnergyToClone = 50;
 float Bot::cloneCost = 45;
 float Bot::startBotEnergy = 30;
@@ -41,6 +41,81 @@ float Bot::mutationSpeedOfParamets = 0.12;
 
 uchar* Bot::tempDirections = new uchar[8];
 
+
+QString Bot::genomCommandsToString(Bot::GenomCommands value)
+{
+    switch (value) {
+        case STAND                 : return "СТОЙ";
+        case GO                    : return "ИДИ";
+        case CHANGEDIRPOSITIVE     : return "ВЕРТИСЬ ПРОТИВ";
+        case CHANGEDIRNEGAITIVE    : return "ВЕРТИСЬ ПО";
+        case PHOTO                 : return "ФОТО";
+        case ATTACK                : return "АТАКА";
+        case EATSUGAR              : return "ЕШЬ САХАР";
+        case EATMINERALS           : return "ЕШЬ МИНЕРАЛЫ";
+        case EATTALLOW             : return "ЕШЬ ЖИР";
+        case SHARESUGAR            : return "ОТДАЙ САХАР";
+        case SHAREMINERALS         : return "ОТДАЙ МИНЕРАЛЫ";
+        case SHARETALLOW           : return "ОТДАЙ ЖИР";
+        case USESUGAR              : return "ИСПОЛЬЗУЙ САХАР";
+        case USEMINERALS           : return "ИСПОЛЬЗУЙ МИНЕРАЛЫ";
+        case USETALLOW             : return "ИСПОЛЬЗУЙ ЖИР";
+        case LOOKENERGY            : return "ПРОВЕРЬ ЭНЕРГИЮ";
+        case LOOKUP                : return "ПОСМОТРИ ВПЕРЕД";
+        case CLONE                 : return "ОТПАЧКОВАТЬ";
+        case MOVEINDEX1            : return "ПЕРЕХОД НА 1";
+        case MOVEINDEX2            : return "ПЕРЕХОД НА 2";
+        case MOVEINDEX3            : return "ПЕРЕХОД НА 3";
+        case MOVEINDEX4            : return "ПЕРЕХОД НА 4";
+        case MOVEINDEX5            : return "ПЕРЕХОД НА 5";
+        case MOVEINDEX6            : return "ПЕРЕХОД НА 6";
+        case MOVEINDEX7            : return "ПЕРЕХОД НА 7";
+        case MOVEINDEX8            : return "ПЕРЕХОД НА 8";
+        case MOVEINDEX9            : return "ПЕРЕХОД НА 9";
+        case MOVEINDEX10           : return "ПЕРЕХОД НА 10";
+        case MOVEINDEX11           : return "ПЕРЕХОД НА 11";
+        case MOVEINDEX12           : return "ПЕРЕХОД НА 12";
+        case MOVEINDEX13           : return "ПЕРЕХОД НА 13";
+        case MOVEINDEX14           : return "ПЕРЕХОД НА 14";
+        case MOVEINDEX15           : return "ПЕРЕХОД НА 15";
+        case MOVEINDEX16           : return "ПЕРЕХОД НА 16";
+        case MOVEINDEX17           : return "ПЕРЕХОД НА 17";
+        case MOVEINDEX18           : return "ПЕРЕХОД НА 18";
+        case MOVEINDEX19           : return "ПЕРЕХОД НА 19";
+        case MOVEINDEX20           : return "ПЕРЕХОД НА 20";
+        case MOVEINDEX21           : return "ПЕРЕХОД НА 21";
+        case MOVEINDEX22           : return "ПЕРЕХОД НА 22";
+        case MOVEINDEX23           : return "ПЕРЕХОД НА 23";
+        case MOVEINDEX24           : return "ПЕРЕХОД НА 24";
+        case MOVEINDEX25           : return "ПЕРЕХОД НА 25";
+        case MOVEINDEX26           : return "ПЕРЕХОД НА 26";
+        case MOVEINDEX27           : return "ПЕРЕХОД НА 27";
+        case MOVEINDEX28           : return "ПЕРЕХОД НА 28";
+        case MOVEINDEX29           : return "ПЕРЕХОД НА 29";
+        case MOVEINDEX30           : return "ПЕРЕХОД НА 30";
+        case MOVEINDEX31           : return "ПЕРЕХОД НА 31";
+        case MOVEINDEX32           : return "ПЕРЕХОД НА 32";
+        case MOVEINDEX33           : return "ПЕРЕХОД НА 33";
+        case MOVEINDEX34           : return "ПЕРЕХОД НА 34";
+        case MOVEINDEX35           : return "ПЕРЕХОД НА 35";
+        case MOVEINDEX36           : return "ПЕРЕХОД НА 36";
+        case MOVEINDEX37           : return "ПЕРЕХОД НА 37";
+        case MOVEINDEX38           : return "ПЕРЕХОД НА 38";
+        case MOVEINDEX39           : return "ПЕРЕХОД НА 39";
+        case MOVEINDEX40           : return "ПЕРЕХОД НА 40";
+        case MOVEINDEX41           : return "ПЕРЕХОД НА 41";
+        case MOVEINDEX42           : return "ПЕРЕХОД НА 42";
+        case MOVEINDEX43           : return "ПЕРЕХОД НА 43";
+        case MOVEINDEX44           : return "ПЕРЕХОД НА 44";
+        case MOVEINDEX45           : return "ПЕРЕХОД НА 45";
+        case MOVEINDEX46           : return "ПЕРЕХОД НА 46";
+        case MOVEINDEX47           : return "ПЕРЕХОД НА 47";
+        case MOVEINDEX48           : return "ПЕРЕХОД НА 48";
+        case MOVEINDEX49           : return "ПЕРЕХОД НА 49";
+        case MOVEINDEX50           : return "ПЕРЕХОД НА 50";
+        default: return QString();
+    }
+}
 
 Bot::Bot() : Cell()
 {
@@ -76,7 +151,7 @@ void Bot::readNextCommand()
         recurtionCounter = 0;
         return;
     }
-    if(energy >= energyMax){
+    if(energy >= (energyMax-everyTernCost)){
         intentionCommand = CLONE;
 
         energy = energyMax;
@@ -228,21 +303,39 @@ void Bot::doSimpleIntention()
                 break;
             }
             case EATSUGAR:{
-                float shugarToEat = eatSugarKof*carrySugar;
-                carrySugar -= shugarToEat;
-                energy += shugarToEat*sugarToEnergyKof;
+                float energyNeed = energyMax-energy;
+                if(carrySugar*eatSugarKof*sugarToEnergyKof <= energyNeed){
+                    float shugarToEat = eatSugarKof*carrySugar;
+                    carrySugar -= shugarToEat;
+                    energy += shugarToEat*sugarToEnergyKof;
+                }else{
+                    carrySugar -= (energyNeed/sugarToEnergyKof)/eatSugarKof;
+                    energy += energyNeed;
+                }
                 break;
             }
             case EATMINERALS:{
-                float mineralsToEat = eatSugarKof*carryMinerals;
-                carryMinerals -= mineralsToEat;
-                energy += mineralsToEat*mineralsToEnergyKof;
+                float energyNeed = energyMax-energy;
+                if(carryMinerals*eatMineralsKof*mineralsToEnergyKof <= energyNeed){
+                    float mineralsToEat = eatSugarKof*carryMinerals;
+                    carryMinerals -= mineralsToEat;
+                    energy += mineralsToEat*mineralsToEnergyKof;
+                }else{
+                    carryMinerals -= (energyNeed/mineralsToEnergyKof)/eatMineralsKof;
+                    energy += energyNeed;
+                }
                 break;
             }
             case EATTALLOW:{
-                float tallowToEat = eatTallowKof*carryTallow;
-                carryTallow -= tallowToEat;
-                energy += tallowToEat*tallowToEnergyKof;
+                float energyNeed = energyMax-energy;
+                if(carryTallow*eatTallowKof*tallowToEnergyKof <= energyNeed){
+                    float tallowToEat = eatTallowKof*carryTallow;
+                    carryTallow -= tallowToEat;
+                    energy += tallowToEat*tallowToEnergyKof;
+                }else{
+                    carryTallow -= (energyNeed/tallowToEnergyKof)/eatTallowKof;
+                    energy += energyNeed;
+                }
                 break;
             }
             case SHARESUGAR:{
@@ -331,6 +424,9 @@ void Bot::doMoveIntention()
             Bot* otherBot = (Bot*)Game::singleGame->world[toMoveY][toMoveX];
             if(otherBot->health <= 0){
                 carryTallow += tallowFromDead;
+                carryTallow += otherBot->carryTallow;
+                carrySugar += otherBot->carrySugar;
+                carryMinerals += otherBot->carryMinerals;
                 if(otherBot->tracking){
                     otherBot->tracking = false;
                 }
@@ -356,8 +452,12 @@ void Bot::doAttackIntention()
         directionToXY(toHitX,toHitY);
         if(Game::singleGame->world[toHitY][toHitX]->childType == Cell::bot){
             Bot* otherBot = (Bot*)Game::singleGame->world[toHitY][toHitX];
-            otherBot->health -= damage*(1-(otherBot->defenceMinerals/(10+otherBot->defenceMinerals)));
-            if(otherBot->health <= 0){
+            float healthBefore = otherBot->health;
+            otherBot->health -= damage*(1-(otherBot->defenceMinerals/(1+otherBot->defenceMinerals)));
+            if(healthBefore > 0 && otherBot->health <= 0){
+                killCount++;
+            }
+            /*if(otherBot->health <= 0){
                 unsigned short lastX = this->x;
                 unsigned short lastY = this->y;
 
@@ -366,6 +466,11 @@ void Bot::doAttackIntention()
                 }
 
                 carryTallow += tallowFromDead;
+
+                carryTallow += otherBot->carryTallow;
+                carrySugar += otherBot->carrySugar;
+                carryMinerals += otherBot->carryMinerals;
+
                 Game::singleGame->botHell.append(otherBot);
                 Empty* newEmpty = Game::singleGame->emptyHell.takeLast();
                 this->setCoords(toHitX,toHitY);
@@ -373,7 +478,7 @@ void Bot::doAttackIntention()
                 newEmpty->recalculateProductivable();
                 Game::singleGame->world[toHitY][toHitX] = this;
                 Game::singleGame->world[lastY][lastX] = newEmpty;
-            }
+            }*/
         }
         payForAttack();
         payForLive();
@@ -401,7 +506,7 @@ void Bot::doCloneIntention()
         if(freeDirectionsCounter > 0){
 
             uchar toCloneDir = rand()%freeDirectionsCounter;
-
+            cloneCount++;
             lookX = x;
             lookY = y;
             directionToXY((Directions)tempDirections[toCloneDir],lookX,lookY);
@@ -447,6 +552,8 @@ void Bot::doCloneIntention()
             newBot->photoUser = photoUser;
             newBot->mineralsUser = mineralsUser;
             newBot->tallowUser = tallowUser;
+            newBot->cloneCount = 0;
+            newBot->killCount = 0;
 
 
             for(unsigned short i = 0; i < genomSize; i++){
@@ -595,7 +702,7 @@ void Bot::payForLive()
     energy -= everyTernCost;
     ternCount++;
     if(ternCount >= botsliveTime){
-        energy -= oldCost+(ternCount-botsliveTime);
+        energy -= oldCost*(ternCount-botsliveTime)*(1-(longLiveSugar/(10+longLiveSugar)));
     }
     if(energy <= 0){
         health += (energy*(1-(longLiveSugar/(10+longLiveSugar))));
@@ -647,14 +754,17 @@ void Bot::calculateLifeStyle()
     tallowUser = 0;
     for(unsigned short i = 0; i < genomSize; i++){
         switch(genom[i]){
-            case EATMINERALS:{
+            case EATMINERALS:
+            case GO:{
                 mineralsUser++;
                 break;
             }
-            case EATSUGAR:{
+            case EATSUGAR:
+            case PHOTO:{
                 photoUser++;
                 break;
             }
+            case EATTALLOW:
             case ATTACK:{
                 tallowUser++;
                 break;

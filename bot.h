@@ -86,6 +86,7 @@ public:
         MOVEINDEX49,
         MOVEINDEX50
     };
+    static QString genomCommandsToString(Bot::GenomCommands value);
 
     enum Directions{
         RIGHT,
@@ -185,6 +186,8 @@ public:
 
     float genomDifference = 0;
     uint ternCount = 0;
+    uint cloneCount = 0;
+    uint killCount = 0;
 
 
 
