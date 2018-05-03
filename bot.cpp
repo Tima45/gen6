@@ -16,7 +16,7 @@ float Bot::mineralsToEnergyKof = 1;
 float Bot::tallowToEnergyKof = 1;
 float Bot::tallowToHealthKof = 1;
 
-float Bot::everyTernCost = 0.1;
+float Bot::everyTurnCost = 0.1;
 uint Bot::botsliveTime = 100;
 
 float Bot::oldCost = 0.5;
@@ -38,6 +38,9 @@ float Bot::startBotEnergy = 30;
 float Bot::genomMutationChance = 0.2;
 float Bot::parametrsMutationChance = 0.2;
 float Bot::mutationSpeedOfParamets = 0.12;
+
+bool Bot::captureAttack = false;
+bool Bot::effectiveEat = true;
 
 uchar* Bot::tempDirections = new uchar[8];
 
@@ -117,6 +120,16 @@ QString Bot::genomCommandsToString(Bot::GenomCommands value)
     }
 }
 
+float Bot::defenceFromDefenceMinerals(float minerals)
+{
+    return minerals/(1.0+minerals);
+}
+
+float Bot::longLiveValueFromSugar(float sugar)
+{
+    return sugar/(1.0+sugar);
+}
+
 Bot::Bot() : Cell()
 {
     childType = Cell::bot;
@@ -151,7 +164,7 @@ void Bot::readNextCommand()
         recurtionCounter = 0;
         return;
     }
-    if(energy >= (energyMax-everyTernCost)){
+    if(energy >= (energyMax-everyTurnCost)){
         intentionCommand = CLONE;
 
         energy = energyMax;
@@ -211,13 +224,18 @@ void Bot::readNextCommand()
             unsigned short lookY = y;
             directionToXY(lookX,lookY);
 
-            if( Game::singleGame->world[lookY][lookX]->childType == Cell::bot){
-                if(genomDifferenceFrom((Bot*) Game::singleGame->world[lookY][lookX]) <= tolerance){
-                    //friendly bot
+            if(Game::singleGame->world[lookY][lookX]->childType == Cell::bot){
+                Bot *bot = (Bot*)Game::singleGame->world[lookY][lookX];
+                if(bot->health < 0){
                     genomIndex += 1;
-                }else{
-                    //not friendly bot
-                    genomIndex += 2;
+                }else {
+                    if(genomDifferenceFrom(bot) <= tolerance){
+                        //friendly bot
+                        genomIndex += 2;
+                    }else{
+                        //not friendly bot
+                        genomIndex += 3;
+                    }
                 }
             }// else if empty, readNextCommand
             readNextCommand();
@@ -303,38 +321,65 @@ void Bot::doSimpleIntention()
                 break;
             }
             case EATSUGAR:{
-                float energyNeed = energyMax-energy;
-                if(carrySugar*eatSugarKof*sugarToEnergyKof <= energyNeed){
+                if(effectiveEat){
+                    float energyNeed = energyMax-energy;
+                    if(carrySugar*eatSugarKof*sugarToEnergyKof <= energyNeed){
+                        float shugarToEat = eatSugarKof*carrySugar;
+                        carrySugar -= shugarToEat;
+                        energy += shugarToEat*sugarToEnergyKof;
+                    }else{
+                        carrySugar -= (energyNeed/sugarToEnergyKof)/eatSugarKof;
+                        energy += energyNeed;
+                    }
+                }else{
                     float shugarToEat = eatSugarKof*carrySugar;
                     carrySugar -= shugarToEat;
                     energy += shugarToEat*sugarToEnergyKof;
-                }else{
-                    carrySugar -= (energyNeed/sugarToEnergyKof)/eatSugarKof;
-                    energy += energyNeed;
+                    if(energy > energyMax){
+                        energy = energyMax;
+                    }
                 }
                 break;
             }
             case EATMINERALS:{
-                float energyNeed = energyMax-energy;
-                if(carryMinerals*eatMineralsKof*mineralsToEnergyKof <= energyNeed){
+                if(effectiveEat){
+                    float energyNeed = energyMax-energy;
+                    if(carryMinerals*eatMineralsKof*mineralsToEnergyKof <= energyNeed){
+                        float mineralsToEat = eatSugarKof*carryMinerals;
+                        carryMinerals -= mineralsToEat;
+                        energy += mineralsToEat*mineralsToEnergyKof;
+                    }else{
+                        carryMinerals -= (energyNeed/mineralsToEnergyKof)/eatMineralsKof;
+                        energy += energyNeed;
+                    }
+                }else{
                     float mineralsToEat = eatSugarKof*carryMinerals;
                     carryMinerals -= mineralsToEat;
                     energy += mineralsToEat*mineralsToEnergyKof;
-                }else{
-                    carryMinerals -= (energyNeed/mineralsToEnergyKof)/eatMineralsKof;
-                    energy += energyNeed;
+                    if(energy > energyMax){
+                        energy = energyMax;
+                    }
                 }
                 break;
             }
             case EATTALLOW:{
-                float energyNeed = energyMax-energy;
-                if(carryTallow*eatTallowKof*tallowToEnergyKof <= energyNeed){
+                if(effectiveEat){
+                    float energyNeed = energyMax-energy;
+                    if(carryTallow*eatTallowKof*tallowToEnergyKof <= energyNeed){
+                        float tallowToEat = eatTallowKof*carryTallow;
+                        carryTallow -= tallowToEat;
+                        energy += tallowToEat*tallowToEnergyKof;
+                    }else{
+                        carryTallow -= (energyNeed/tallowToEnergyKof)/eatTallowKof;
+                        energy += energyNeed;
+                    }
+                }else{
                     float tallowToEat = eatTallowKof*carryTallow;
                     carryTallow -= tallowToEat;
                     energy += tallowToEat*tallowToEnergyKof;
-                }else{
-                    carryTallow -= (energyNeed/tallowToEnergyKof)/eatTallowKof;
-                    energy += energyNeed;
+                    if(energy > energyMax){
+                        energy = energyMax;
+                    }
                 }
                 break;
             }
@@ -405,8 +450,8 @@ void Bot::doMoveIntention()
         unsigned short toMoveX = x;
         unsigned short toMoveY = y;
         directionToXY(toMoveX,toMoveY);
-        unsigned short lastX = this->x;
-        unsigned short lastY = this->y;
+        unsigned short lastX = x;
+        unsigned short lastY = y;
         Game::singleGame->world[toMoveY][toMoveX]->botToMoveOn = nullptr;
         if(Game::singleGame->world[toMoveY][toMoveX]->childType == Cell::empty){
             Empty* cell = (Empty*) Game::singleGame->world[toMoveY][toMoveX];
@@ -433,6 +478,8 @@ void Bot::doMoveIntention()
                 Game::singleGame->botHell.append(otherBot);
                 Empty* newEmpty = Game::singleGame->emptyHell.takeLast();
                 this->setCoords(toMoveX,toMoveY);
+                newEmpty->minerals = 0;
+                newEmpty->botToMoveOn = nullptr;
                 newEmpty->setCoords(lastX,lastY);
                 newEmpty->recalculateProductivable();
                 Game::singleGame->world[toMoveY][toMoveX] = this;
@@ -453,32 +500,36 @@ void Bot::doAttackIntention()
         if(Game::singleGame->world[toHitY][toHitX]->childType == Cell::bot){
             Bot* otherBot = (Bot*)Game::singleGame->world[toHitY][toHitX];
             float healthBefore = otherBot->health;
-            otherBot->health -= damage*(1-(otherBot->defenceMinerals/(1+otherBot->defenceMinerals)));
+            otherBot->health -= damage*(1.0-(defenceFromDefenceMinerals(defenceMinerals)));
             if(healthBefore > 0 && otherBot->health <= 0){
                 killCount++;
             }
-            /*if(otherBot->health <= 0){
-                unsigned short lastX = this->x;
-                unsigned short lastY = this->y;
+            if(captureAttack){
+                if(otherBot->health <= 0){
+                    unsigned short lastX = this->x;
+                    unsigned short lastY = this->y;
 
-                if(otherBot->tracking){
-                    otherBot->tracking = false;
+                    if(otherBot->tracking){
+                        otherBot->tracking = false;
+                    }
+
+                    carryTallow += tallowFromDead;
+
+                    carryTallow += otherBot->carryTallow;
+                    carrySugar += otherBot->carrySugar;
+                    carryMinerals += otherBot->carryMinerals;
+
+                    Game::singleGame->botHell.append(otherBot);
+                    Empty* newEmpty = Game::singleGame->emptyHell.takeLast();
+                    newEmpty->minerals = 0;
+                    newEmpty->botToMoveOn = nullptr;
+                    this->setCoords(toHitX,toHitY);
+                    newEmpty->setCoords(lastX,lastY);
+                    newEmpty->recalculateProductivable();
+                    Game::singleGame->world[toHitY][toHitX] = this;
+                    Game::singleGame->world[lastY][lastX] = newEmpty;
                 }
-
-                carryTallow += tallowFromDead;
-
-                carryTallow += otherBot->carryTallow;
-                carrySugar += otherBot->carrySugar;
-                carryMinerals += otherBot->carryMinerals;
-
-                Game::singleGame->botHell.append(otherBot);
-                Empty* newEmpty = Game::singleGame->emptyHell.takeLast();
-                this->setCoords(toHitX,toHitY);
-                newEmpty->setCoords(lastX,lastY);
-                newEmpty->recalculateProductivable();
-                Game::singleGame->world[toHitY][toHitX] = this;
-                Game::singleGame->world[lastY][lastX] = newEmpty;
-            }*/
+            }
         }
         payForAttack();
         payForLive();
@@ -523,7 +574,7 @@ void Bot::doCloneIntention()
 
             newBot->intentionCommand = 0;
             newBot->genomIndex = 0;
-            newBot->ternCount = 0;
+            newBot->turnCount = 0;
 
             newBot->health = 100;
             newBot->energy = startBotEnergy;
@@ -628,10 +679,9 @@ void Bot::doCloneIntention()
                     }
                     default:;
                 }
-            }
-
-            payForClone();
+            }   
         }
+        payForClone();
     }
     payForLive();
 }
@@ -699,13 +749,13 @@ void Bot::payForLive()
         longLiveSugar = 0;
     }
 
-    energy -= everyTernCost;
-    ternCount++;
-    if(ternCount >= botsliveTime){
-        energy -= oldCost*(ternCount-botsliveTime)*(1-(longLiveSugar/(10+longLiveSugar)));
+    energy -= everyTurnCost;
+    turnCount++;
+    if(turnCount >= botsliveTime){
+        energy -= oldCost*(turnCount-botsliveTime)*(1-(longLiveValueFromSugar(longLiveSugar)));
     }
     if(energy <= 0){
-        health += (energy*(1-(longLiveSugar/(10+longLiveSugar))));
+        health += (energy*(1-(longLiveValueFromSugar(longLiveSugar))));
     }
 /*
     genomDifference = 0;

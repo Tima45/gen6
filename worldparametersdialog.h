@@ -4,6 +4,7 @@
 #include <QDialog>
 #include "bot.h"
 #include "empty.h"
+#include "game.h"
 
 namespace Ui {
 class WorldParametersDialog;

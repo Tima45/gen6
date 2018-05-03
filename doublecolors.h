@@ -21,6 +21,20 @@ public:
 
     static const double GenomDifferenceMaxColor;
     static const double GenomDifferenceMinColor;
+
+    static const double KillMaxColor;
+    static const double KillMinColor;
+    static const double NoKillColor;
+
+    static const double CloneMinColor;
+    static const double CloneMaxColor;
+
+    static const double DefenceMinColor;
+    static const double DefenceMaxColor;
+
+    static const double LongLiveMinColor;
+    static const double LongLiveMaxColor;
+
 };
 
 #endif // DOUBLECOLORS_H

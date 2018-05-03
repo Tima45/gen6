@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1165</width>
-    <height>865</height>
+    <height>889</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -58,7 +58,7 @@
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
          <item row="13" column="1">
-          <widget class="QLabel" name="ternsPerSecondLabel">
+          <widget class="QLabel" name="turnsPerSecondLabel">
            <property name="text">
             <string/>
            </property>
@@ -160,7 +160,7 @@
           </widget>
          </item>
          <item row="12" column="1">
-          <widget class="QLabel" name="ternLabel">
+          <widget class="QLabel" name="turnLabel">
            <property name="text">
             <string/>
            </property>
@@ -176,7 +176,7 @@
          <item row="3" column="1">
           <widget class="QComboBox" name="comboBox">
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Стиль: отрисовка ботов цветом стилю получения энергии(Зеленый - фотосинтез, Красный - трупы, Синий - минералы)&lt;/p&gt;&lt;p&gt;Энергия: отрисовка ботов по количеству энергии.&lt;/p&gt;&lt;p&gt;Разница генома: отрисовка ботов в соответсвии с их разницой в геноме относительно окружающих.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <item>
             <property name="text">
@@ -190,7 +190,22 @@
            </item>
            <item>
             <property name="text">
-             <string>Резница генома</string>
+             <string>Количество убийств</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Количество потомков</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Защита</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Баф долголетия</string>
             </property>
            </item>
           </widget>
@@ -198,9 +213,7 @@
          <item row="3" column="0">
           <widget class="QLabel" name="label_5">
            <property name="toolTip">
-            <string>Команды: отрисовка ботов цветом команды котору они выполняют.
-Энергия: отрисовка ботов по количеству энергии.
-Разница генома: отрисовка ботов в соответсвии с их разницой в геноме относительно выбранного.</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Стиль: отрисовка ботов цветом по стилю получения энергии(&lt;span style=&quot; font-weight:600; color:#168702;&quot;&gt;Зеленый&lt;/span&gt; - фотосинтез, &lt;span style=&quot; font-weight:600; color:#940000;&quot;&gt;Красный&lt;/span&gt; - трупы, &lt;span style=&quot; font-weight:600; color:#0b1fd1;&quot;&gt;Синий&lt;/span&gt; - минералы)&lt;/p&gt;&lt;p&gt;Энергия: отрисовка ботов по количеству энергии.&lt;/p&gt;&lt;p&gt;Разница генома: отрисовка ботов в соответсвии с их разницой в геноме относительно окружающих.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
             <string>Режим отображения</string>
@@ -210,8 +223,7 @@
          <item row="4" column="0">
           <widget class="QCheckBox" name="skipReplotCheck">
            <property name="toolTip">
-            <string>Если выбрано - пропускает фазу обновления экрана, при этом данные для графика обновляются реже.
-Иначе - отображает каждый ход в соответсвии с режимом отрисовки.</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если выбрано - пропускает фазу обновления экрана, при этом данные для графика обновляются реже.&lt;/p&gt;&lt;p&gt;Иначе - отображает каждый ход в соответсвии с режимом отображения.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
             <string>Пропуск отрисовки</string>
@@ -274,7 +286,7 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QPushButton" name="nextTernButton">
+          <widget class="QPushButton" name="nextTurnButton">
            <property name="maximumSize">
             <size>
              <width>18</width>

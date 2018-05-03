@@ -1,9 +1,9 @@
 #include "game.h"
 
 
-Game* Game::singleGame = nullptr;
+Game* Game::singleGame = 0;
 
-uchar Game::ternsToUpdateInSkipMode = 64;
+uchar Game::turnsToUpdateInSkipMode = 64;
 const unsigned short Game::worldWidth = 512;
 const unsigned short Game::worldHeight = 512;
 
@@ -14,7 +14,7 @@ Game::Game(QObject *parent) : QObject(parent)
     emptyHell.reserve(worldWidth*worldHeight);
     */
 
-    if(singleGame == nullptr){
+    if(singleGame == 0){
         singleGame = this;
     }
 
@@ -37,7 +37,7 @@ Game::Game(QObject *parent) : QObject(parent)
             world[y][x] = cell;
         }
     }
-    displayMode = Commands;
+    displayMode = Style;
 }
 
 Game::~Game()
@@ -49,11 +49,11 @@ Game::~Game()
     singleGame = nullptr;
 }
 
-void Game::tern()
+void Game::turn()
 {
 
     locker.lockForWrite();
-    inTern = true;
+    inTurn = true;
     locker.unlock();
 
     aliveBotsCount = 0;
@@ -115,32 +115,37 @@ void Game::tern()
     }*/
     //-------------------------------------------
     locker.lockForWrite();
-    currentTern++;
+    currentTurn++;
     locker.unlock();
 
     locker.lockForRead();
     if(skipDisplay){
         locker.unlock();
-        if(currentTern%ternsToUpdateInSkipMode == 0){
-            emit updateLabels(currentTern,aliveBotsCount,deadBotsCount);
+        if(currentTurn%turnsToUpdateInSkipMode == 0){
+            emit updateLabels(currentTurn,aliveBotsCount,deadBotsCount);
         }
     }else{
         locker.unlock();
-        emit updateLabels(currentTern,aliveBotsCount,deadBotsCount);
+        emit updateLabels(currentTurn,aliveBotsCount,deadBotsCount);
         drawWorld();
         emit emitReplotWorld(QCustomPlot::rpQueuedReplot);
     }
     locker.lockForWrite();
-    inTern = false;
+    inTurn = false;
     locker.unlock();
+}
+
+int Game::test()
+{
+    return 65;
 }
 
 void Game::resetWorld()
 {
     locker.lockForRead();
-    if(!inTern && !isPlaying){
+    if(!inTurn && !isPlaying){
         locker.unlock();
-        currentTern = 0;
+        currentTurn = 0;
         for(unsigned short y = 0; y < worldHeight; y++){
             for(unsigned short x = 0; x < worldWidth; x++){
                 if(world[y][x]->childType == Cell::empty){
@@ -174,7 +179,7 @@ void Game::resetWorld()
 
 
             firstBot->genomIndex = 0;
-            firstBot->ternCount = 0;
+            firstBot->turnCount = 0;
 
             firstBot->health = 100;
             firstBot->energy = 80;
@@ -224,7 +229,7 @@ void Game::resetWorld()
 
 
             firstBot->genomIndex = 0;
-            firstBot->ternCount = 0;
+            firstBot->turnCount = 0;
 
             firstBot->health = 100;
             firstBot->energy = 80;
@@ -272,7 +277,11 @@ void Game::drawWorld()
         for(unsigned short x = 0; x < worldWidth;x++){
             if(world[y][x]->childType == Cell::empty){
                 Empty *cell = (Empty*)world[y][x];
-                colorMap->data()->setCell(x,y, (cell->minerals/Empty::mineralsMax)*(DoubleColors::MineralsMaxColor - DoubleColors::MineralsMinColor) + DoubleColors::MineralsMinColor);
+                if(cell->minerals < Empty::mineralsMax){
+                    colorMap->data()->setCell(x,y, (cell->minerals/Empty::mineralsMax)*(DoubleColors::MineralsMaxColor - DoubleColors::MineralsMinColor) + DoubleColors::MineralsMinColor);
+                }else{
+                    colorMap->data()->setCell(x,y,DoubleColors::MineralsMaxColor);
+                }
             } else if(world[y][x]->childType == Cell::bot){
                 Bot *bot = (Bot*)world[y][x];
                 if(bot->health <= 0){
@@ -280,7 +289,7 @@ void Game::drawWorld()
                 }else{
                     locker.lockForRead();
                     switch (displayMode) {
-                        case Commands:{
+                        case Style:{
                             if((bot->photoUser == bot->mineralsUser) && (bot->photoUser == bot->tallowUser)){
                                 colorMap->data()->setCell(x,y,DoubleColors::StandingColor);
                             }else{
@@ -304,8 +313,30 @@ void Game::drawWorld()
                             }
                             break;
                         }
-                        case Genomdiff:{
-                            colorMap->data()->setCell(x,y,(bot->genomDifference)*(DoubleColors::BotEnergyMaxColor - DoubleColors::BotEnergyMinColor) + DoubleColors::BotEnergyMinColor);
+                        case KillCount:{
+                            if(bot->killCount == 0){
+                                colorMap->data()->setCell(x,y,DoubleColors::NoKillColor);
+                            } else if(bot->killCount < 20){
+                                colorMap->data()->setCell(x,y,(bot->killCount/20.0)*(DoubleColors::KillMaxColor - DoubleColors::KillMinColor) + DoubleColors::KillMinColor);
+                            }else{
+                                colorMap->data()->setCell(x,y,DoubleColors::KillMaxColor);
+                            }
+                            break;
+                        }
+                        case CloneCount:{
+                            if(bot->cloneCount < 10){
+                                colorMap->data()->setCell(x,y,(bot->cloneCount/10.0)*(DoubleColors::CloneMaxColor - DoubleColors::CloneMinColor) + DoubleColors::CloneMinColor);
+                            }else{
+                                colorMap->data()->setCell(x,y,DoubleColors::CloneMaxColor);
+                            }
+                            break;
+                        }
+                        case DefenceAmount:{
+                             colorMap->data()->setCell(x,y,(Bot::defenceFromDefenceMinerals(bot->defenceMinerals))*(DoubleColors::DefenceMaxColor - DoubleColors::DefenceMinColor) + DoubleColors::DefenceMinColor);
+                            break;
+                        }
+                        case LongLiveAmount:{
+                             colorMap->data()->setCell(x,y,(Bot::longLiveValueFromSugar(bot->longLiveSugar))*(DoubleColors::LongLiveMaxColor - DoubleColors::LongLiveMinColor) + DoubleColors::LongLiveMinColor);
                             break;
                         }
                     }
@@ -321,15 +352,27 @@ void Game::infinitGamePlaying()
     locker.lockForRead();
     while(isPlaying){
         locker.unlock();
-        tern();
+        turn();
         locker.lockForRead();
     }
     locker.unlock();
 }
 
-void Game::playOneTern()
+void Game::playOneTurn()
 {
     isPlaying = true;
-    tern();
+    turn();
     isPlaying = false;
+}
+
+void Game::recalculateMineralsProductivable()
+{
+    for(unsigned short y = 0; y < worldHeight; y++){
+        for(unsigned short x = 0; x < worldWidth;x++){
+            if(world[y][x]->childType == Cell::empty){
+                Empty *cell = (Empty*)world[y][x];
+                cell->recalculateProductivable();
+            }
+        }
+    }
 }

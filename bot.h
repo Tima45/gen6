@@ -87,6 +87,8 @@ public:
         MOVEINDEX50
     };
     static QString genomCommandsToString(Bot::GenomCommands value);
+    static float defenceFromDefenceMinerals(float minerals);
+    static float longLiveValueFromSugar(float sugar);
 
     enum Directions{
         RIGHT,
@@ -112,7 +114,7 @@ public:
     static float tallowToHealthKof;
 
     static uint botsliveTime;
-    static float everyTernCost;
+    static float everyTurnCost;
     static float oldCost;
 
     static float defenceCoolDown;
@@ -135,6 +137,8 @@ public:
     static float mutationSpeedOfParamets;
 
     static uchar* tempDirections;
+    static bool captureAttack;
+    static bool effectiveEat;
 
     Bot();
     Bot(unsigned short x,unsigned short y);
@@ -185,7 +189,7 @@ public:
     float tallowUser = 0;
 
     float genomDifference = 0;
-    uint ternCount = 0;
+    uint turnCount = 0;
     uint cloneCount = 0;
     uint killCount = 0;
 

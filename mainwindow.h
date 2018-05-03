@@ -33,9 +33,13 @@ public:
     QReadWriteLock locker;
 
     QCPColorMap *colorMap;
-    QCPColorGradient commandsGradient;
+    QCPColorGradient styleGradient;
     QCPColorGradient energyGradient;
-    QCPColorGradient genomdiffGradient;
+    QCPColorGradient killGradient;
+    QCPColorGradient cloneGradient;
+    QCPColorGradient defenceGradient;
+    QCPColorGradient longLiveGradient;
+
 
     QCPItemRect *cursor;
     QCPItemTracer *traceLeftTop;
@@ -51,7 +55,7 @@ public:
     void initPlot();
 signals:
     void startGame();
-    void playOneTern();
+    void playOneTurn();
 
 
 
@@ -60,7 +64,7 @@ private slots:
 
     void on_startStopButton_clicked();
 
-    void updateLabels(uint tern, uint alive, uint dead);
+    void updateLabels(uint turn, uint alive, uint dead);
 
 
     void on_skipReplotCheck_clicked(bool checked);
@@ -73,14 +77,14 @@ private slots:
 
     void on_rescaleButton_clicked();
 
-    void on_nextTernButton_clicked();
+    void on_nextTurnButton_clicked();
     void displayBotInfo(Bot*bot);
 
     void on_worldParameternsButton_clicked();
 
 private:
     Ui::MainWindow *ui;
-    int lastTern = 0;
+    int lastTurn = 0;
 };
 
 #endif // MAINWINDOW_H

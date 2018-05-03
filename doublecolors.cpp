@@ -19,3 +19,18 @@ const double DoubleColors::BotEnergyMaxColor = 1;
 
 const double DoubleColors::GenomDifferenceMinColor = 0.13;
 const double DoubleColors::GenomDifferenceMaxColor = 1;
+
+const double DoubleColors::NoKillColor = 0.13;
+const double DoubleColors::KillMinColor = 0.14;
+const double DoubleColors::KillMaxColor = 1;
+
+const double DoubleColors::CloneMinColor = 0.13;
+const double DoubleColors::CloneMaxColor = 1;
+
+const double DoubleColors::DefenceMinColor = 0.13;
+const double DoubleColors::DefenceMaxColor = 1;
+
+const double DoubleColors::LongLiveMinColor = 0.13;
+const double DoubleColors::LongLiveMaxColor = 1;
+
+

@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     game->moveToThread(gameThread);
 
     connect(this,SIGNAL(startGame()),game,SLOT(infinitGamePlaying()),Qt::QueuedConnection);
-    connect(this,SIGNAL(playOneTern()),game,SLOT(playOneTern()),Qt::QueuedConnection);
+    connect(this,SIGNAL(playOneTurn()),game,SLOT(playOneTurn()),Qt::QueuedConnection);
     connect(game,SIGNAL(updateLabels(uint,uint,uint)),this,SLOT(updateLabels(uint,uint,uint)),Qt::QueuedConnection);
     qRegisterMetaType<QCustomPlot::RefreshPriority>("QCustomPlot::RefreshPriority");
     connect(game,SIGNAL(emitReplotWorld(QCustomPlot::RefreshPriority)),ui->worldPlot,SLOT(replot(QCustomPlot::RefreshPriority)),Qt::QueuedConnection);
@@ -85,18 +85,18 @@ void MainWindow::initPlot()
     colorMap->setAntialiasedFill(false);
     colorMap->setAntialiasedScatters(false);
     //-----------------------------------------------------------------------
-    commandsGradient.clearColorStops();
-    commandsGradient.setColorInterpolation(QCPColorGradient::ColorInterpolation::ciRGB);
-    commandsGradient.setColorStopAt(DoubleColors::MineralsMinColor,QColor(255,255,255));    //minerals
-    commandsGradient.setColorStopAt(DoubleColors::MineralsMaxColor,QColor(128,128,255));
-    commandsGradient.setColorStopAt(DoubleColors::StandingColor,QColor(69,69,69));
-    commandsGradient.setColorStopAt(DoubleColors::DeadBotColor,QColor(139,94,73));
-    commandsGradient.setColorStopAt(DoubleColors::PhotoUserMinColor,QColor(69,69,69));
-    commandsGradient.setColorStopAt(DoubleColors::PhotoUserMaxColor,QColor(0,180,50));
-    commandsGradient.setColorStopAt(DoubleColors::MineralsUserMinColor,QColor(69,69,69));
-    commandsGradient.setColorStopAt(DoubleColors::MineralsUserMaxColor,QColor(20,20,255));
-    commandsGradient.setColorStopAt(DoubleColors::TallowUserMinColor,QColor(69,69,69));
-    commandsGradient.setColorStopAt(DoubleColors::TallowUserMaxColor,QColor(255,10,50));
+    styleGradient.clearColorStops();
+    styleGradient.setColorInterpolation(QCPColorGradient::ColorInterpolation::ciRGB);
+    styleGradient.setColorStopAt(DoubleColors::MineralsMinColor,QColor(255,255,255));    //minerals
+    styleGradient.setColorStopAt(DoubleColors::MineralsMaxColor,QColor(128,128,255));
+    styleGradient.setColorStopAt(DoubleColors::StandingColor,QColor(69,69,69));
+    styleGradient.setColorStopAt(DoubleColors::DeadBotColor,QColor(139,94,73));
+    styleGradient.setColorStopAt(DoubleColors::PhotoUserMinColor,QColor(69,69,69));
+    styleGradient.setColorStopAt(DoubleColors::PhotoUserMaxColor,QColor(0,180,50));
+    styleGradient.setColorStopAt(DoubleColors::MineralsUserMinColor,QColor(69,69,69));
+    styleGradient.setColorStopAt(DoubleColors::MineralsUserMaxColor,QColor(20,20,255));
+    styleGradient.setColorStopAt(DoubleColors::TallowUserMinColor,QColor(69,69,69));
+    styleGradient.setColorStopAt(DoubleColors::TallowUserMaxColor,QColor(255,10,50));
 
     energyGradient.clearColorStops();
     energyGradient.setColorInterpolation(QCPColorGradient::ColorInterpolation::ciRGB);
@@ -107,16 +107,41 @@ void MainWindow::initPlot()
     energyGradient.setColorStopAt(DoubleColors::BotEnergyMaxColor,QColor(255,255,0));
     energyGradient.setColorStopAt(DoubleColors::BotEnergyMinColor,QColor(175,68,15));
 
-    genomdiffGradient.clearColorStops();
-    genomdiffGradient.setColorInterpolation(QCPColorGradient::ColorInterpolation::ciRGB);
-    genomdiffGradient.setColorStopAt(DoubleColors::MineralsMinColor,QColor(255,255,255));
-    genomdiffGradient.setColorStopAt(DoubleColors::MineralsMaxColor,QColor(128,128,255));
-    genomdiffGradient.setColorStopAt(DoubleColors::StandingColor,QColor(180,180,180));
-    genomdiffGradient.setColorStopAt(DoubleColors::DeadBotColor,QColor(139,94,73));
-    genomdiffGradient.setColorStopAt(DoubleColors::GenomDifferenceMaxColor,QColor(255,0,0));
-    genomdiffGradient.setColorStopAt(DoubleColors::GenomDifferenceMinColor,QColor(0,255,0));
-    //-------
-    colorMap->setGradient(commandsGradient);
+    killGradient.clearColorStops();
+    killGradient.setColorInterpolation(QCPColorGradient::ColorInterpolation::ciRGB);
+    killGradient.setColorStopAt(DoubleColors::MineralsMinColor,QColor(255,255,255));
+    killGradient.setColorStopAt(DoubleColors::MineralsMaxColor,QColor(128,128,255));
+    killGradient.setColorStopAt(DoubleColors::DeadBotColor,QColor(139,94,73));
+    killGradient.setColorStopAt(DoubleColors::NoKillColor,QColor(0,255,0));
+    killGradient.setColorStopAt(DoubleColors::KillMinColor,QColor(100,0,0));
+    killGradient.setColorStopAt(DoubleColors::KillMaxColor,QColor(255,0,0));
+
+    cloneGradient.clearColorStops();
+    cloneGradient.setColorInterpolation(QCPColorGradient::ColorInterpolation::ciRGB);
+    cloneGradient.setColorStopAt(DoubleColors::MineralsMinColor,QColor(255,255,255));
+    cloneGradient.setColorStopAt(DoubleColors::MineralsMaxColor,QColor(128,128,255));
+    cloneGradient.setColorStopAt(DoubleColors::DeadBotColor,QColor(139,94,73));
+    cloneGradient.setColorStopAt(DoubleColors::CloneMinColor,QColor(QColor(175,68,15)));
+    cloneGradient.setColorStopAt(DoubleColors::CloneMaxColor,QColor(QColor(255,255,0)));
+
+    defenceGradient.clearColorStops();
+    defenceGradient.setColorInterpolation(QCPColorGradient::ColorInterpolation::ciRGB);
+    defenceGradient.setColorStopAt(DoubleColors::MineralsMinColor,QColor(255,255,255));
+    defenceGradient.setColorStopAt(DoubleColors::MineralsMaxColor,QColor(128,128,255));
+    defenceGradient.setColorStopAt(DoubleColors::DeadBotColor,QColor(139,94,73));
+    defenceGradient.setColorStopAt(DoubleColors::DefenceMinColor,QColor(QColor(175,68,15)));
+    defenceGradient.setColorStopAt(DoubleColors::DefenceMaxColor,QColor(QColor(255,255,0)));
+
+    longLiveGradient.clearColorStops();
+    longLiveGradient.setColorInterpolation(QCPColorGradient::ColorInterpolation::ciRGB);
+    longLiveGradient.setColorStopAt(DoubleColors::MineralsMinColor,QColor(255,255,255));
+    longLiveGradient.setColorStopAt(DoubleColors::MineralsMaxColor,QColor(128,128,255));
+    longLiveGradient.setColorStopAt(DoubleColors::DeadBotColor,QColor(139,94,73));
+    longLiveGradient.setColorStopAt(DoubleColors::DefenceMinColor,QColor(QColor(175,68,15)));
+    longLiveGradient.setColorStopAt(DoubleColors::DefenceMaxColor,QColor(QColor(255,255,0)));
+
+    //----
+    colorMap->setGradient(styleGradient);
     colorMap->data()->setCell(0,0,0);
     colorMap->data()->setCell(0,1,1);
     colorMap->rescaleDataRange(true);
@@ -181,9 +206,11 @@ void MainWindow::on_newWorldButton_clicked()
         game->resetWorld();
         game->drawWorld();
         ui->worldPlot->replot();
+
+        aliveGraph->data()->clear();
+        deadGraph->data()->clear();
     }
-    aliveGraph->data()->clear();
-    deadGraph->data()->clear();
+
 }
 
 void MainWindow::on_startStopButton_clicked()
@@ -200,13 +227,13 @@ void MainWindow::on_startStopButton_clicked()
     locker.unlock();
 }
 
-void MainWindow::updateLabels(uint tern, uint alive, uint dead)
+void MainWindow::updateLabels(uint turn, uint alive, uint dead)
 {
-    ui->ternLabel->setText(QString::number(tern));
+    ui->turnLabel->setText(QString::number(turn));
     ui->aliveCountLabel->setText(QString::number(alive));
     ui->deadCountLabel->setText(QString::number(dead));
-    aliveGraph->addData(tern,alive);
-    deadGraph->addData(tern,dead);
+    aliveGraph->addData(turn,alive);
+    deadGraph->addData(turn,dead);
     ui->aliveDeadPlot->replot();
     ui->aliveDeadPlot->rescaleAxes();
 
@@ -299,9 +326,9 @@ void MainWindow::on_skipReplotCheck_clicked(bool checked)
 void MainWindow::fpsCount()
 {
     locker.lockForRead();
-    int newFps = game->currentTern;
+    int newFps = game->currentTurn;
     locker.unlock();
-    ui->ternsPerSecondLabel->setText(QString::number((newFps-lastFps)*4.0));
+    ui->turnsPerSecondLabel->setText(QString::number((newFps-lastFps)*4.0));
     lastFps = newFps;
 }
 
@@ -402,7 +429,7 @@ void MainWindow::on_comboBox_currentIndexChanged(int index)
     locker.unlock();
     switch(index){
         case 0:{
-            colorMap->setGradient(commandsGradient);
+            colorMap->setGradient(styleGradient);
             break;
         }
         case 1:{
@@ -410,7 +437,19 @@ void MainWindow::on_comboBox_currentIndexChanged(int index)
             break;
         }
         case 2:{
-            colorMap->setGradient(genomdiffGradient);
+            colorMap->setGradient(killGradient);
+            break;
+        }
+        case 3:{
+            colorMap->setGradient(cloneGradient);
+            break;
+        }
+        case 4:{
+            colorMap->setGradient(defenceGradient);
+            break;
+        }
+        case 5:{
+            colorMap->setGradient(longLiveGradient);
             break;
         }
     }
@@ -428,10 +467,10 @@ void MainWindow::on_rescaleButton_clicked()
     ui->worldPlot->yAxis->setRange(0,Game::worldHeight);
 }
 
-void MainWindow::on_nextTernButton_clicked()
+void MainWindow::on_nextTurnButton_clicked()
 {
     game->isPlaying = false;
-    emit playOneTern();
+    emit playOneTurn();
     ui->startStopButton->setText("Старт");;
 }
 
@@ -453,9 +492,9 @@ void MainWindow::displayBotInfo(Bot *bot)
     ui->shareMineralsLabel->setText(QString::number(bot->shareMineralsKof));
     ui->shareSugarLabel->setText(QString::number(bot->shareSugarKof));
     ui->shareTallowLabel->setText(QString::number(bot->shareTallowKof));
-    ui->defenceLabel->setText(QString::number(bot->defenceMinerals/(1+bot->defenceMinerals)));
-    ui->longLiveLabel->setText(QString::number(bot->longLiveSugar/(10+bot->longLiveSugar)));
-    ui->lifeTimeLabel->setText(QString::number(bot->ternCount));
+    ui->defenceLabel->setText(QString::number(Bot::defenceFromDefenceMinerals(bot->defenceMinerals)));
+    ui->longLiveLabel->setText(QString::number(Bot::longLiveValueFromSugar(bot->longLiveSugar)));
+    ui->lifeTimeLabel->setText(QString::number(bot->turnCount));
     ui->cloneCountLabel->setText(QString::number(bot->cloneCount));
     ui->killCountLabel->setText(QString::number(bot->killCount));
 

@@ -14,7 +14,7 @@ WorldParametersDialog::WorldParametersDialog(QWidget *parent) :
     ui->mineralsToEnergyKofBox->setValue(Bot::mineralsToEnergyKof);
     ui->tallowToEnergyKofBox->setValue(Bot::tallowToEnergyKof);
     ui->tallowToHealthKofBox->setValue(Bot::tallowToHealthKof);
-    ui->everyTernCostBox->setValue(Bot::everyTernCost);
+    ui->everyTurnCostBox->setValue(Bot::everyTurnCost);
     ui->botsliveTimeBox->setValue(Bot::botsliveTime);
     ui->oldCostBox->setValue(Bot::oldCost);
     ui->defenceCoolDownBox->setValue(Bot::defenceCoolDown);
@@ -39,6 +39,9 @@ WorldParametersDialog::WorldParametersDialog(QWidget *parent) :
     ui->produciveProbabilityMinBox->setValue(Empty::produciveProbabilityMin);
     ui->mineralsGrowBorderBox->setValue(Empty::mineralsGrowBorder);
 
+    ui->effectiveEatBox->setChecked(Bot::effectiveEat);
+    ui->captureAttackBox->setChecked(Bot::captureAttack);
+
 
 }
 
@@ -50,14 +53,14 @@ WorldParametersDialog::~WorldParametersDialog()
 void WorldParametersDialog::on_buttonBox_accepted()
 {
     Bot::tolerance = ui->toleranceBox->value();
-    Bot::photoSugarMax = ui->photoSugarMaxBox->value()           ;
+    Bot::photoSugarMax = ui->photoSugarMaxBox->value();
     Bot::photoSugarMin = ui->photoSugarMinBox->value();
     Bot::photoSugarBorder = ui->photoSugarBorderBox->value();
     Bot::sugarToEnergyKof = ui->sugarToEnergyKofBox->value();
     Bot::mineralsToEnergyKof = ui->mineralsToEnergyKofBox->value();
     Bot::tallowToEnergyKof = ui->tallowToEnergyKofBox->value();
     Bot::tallowToHealthKof = ui->tallowToHealthKofBox->value();
-    Bot::everyTernCost = ui->everyTernCostBox->value();
+    Bot::everyTurnCost = ui->everyTurnCostBox->value();
     Bot::botsliveTime = ui->botsliveTimeBox->value();
     Bot::oldCost = ui->oldCostBox->value();
     Bot::defenceCoolDown = ui->defenceCoolDownBox->value();
@@ -78,8 +81,16 @@ void WorldParametersDialog::on_buttonBox_accepted()
     Empty::mineralsMin = ui->mineralsMinBox->value();
     Empty::mineralsGrowSpeedMax = ui->mineralsGrowSpeedMaxBox->value();
     Empty::mineralsGrowSpeedMin = ui->mineralsGrowSpeedMinBox->value();
-    Empty::produciveProbabilityMax = ui->produciveProbabilityMaxBox->value();
-    Empty::produciveProbabilityMin = ui->produciveProbabilityMinBox->value();
+
+    if(Empty::produciveProbabilityMax != ui->produciveProbabilityMaxBox->value() || Empty::produciveProbabilityMin != ui->produciveProbabilityMinBox->value()){
+        Empty::produciveProbabilityMax = ui->produciveProbabilityMaxBox->value();
+        Empty::produciveProbabilityMin = ui->produciveProbabilityMinBox->value();
+        Game::singleGame->recalculateMineralsProductivable();
+    }
+
     Empty::mineralsGrowBorder = ui->mineralsGrowBorderBox->value();
+
+    Bot::effectiveEat = ui->effectiveEatBox->isChecked();
+    Bot::captureAttack = ui->captureAttackBox->isChecked();
 
 }

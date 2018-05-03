@@ -211,7 +211,7 @@
           <item>
            <widget class="QDoubleSpinBox" name="produciveProbabilityMaxBox">
             <property name="minimum">
-             <double>0.010000000000000</double>
+             <double>0.000000000000000</double>
             </property>
             <property name="maximum">
              <double>10000.000000000000000</double>
@@ -252,7 +252,7 @@
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Радиус границы за которой начинается рост минералов&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
-             <string>Граница</string>
+             <string>Радиус</string>
             </property>
            </widget>
           </item>
@@ -267,6 +267,35 @@
            </widget>
           </item>
          </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_9">
+       <property name="title">
+        <string>Механики</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_9">
+        <item row="0" column="0">
+         <widget class="QCheckBox" name="captureAttackBox">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если включено: бот совершает шаг на клетку жертвы если убил ее и захватывает все ресурсы в этот ход.(нет трупа - нет преступления)&lt;br/&gt;Если выключено: после заврешения атаки бот может оставить труп жертвы.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>Атака с захватом</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QCheckBox" name="effectiveEatBox">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если включено: бот не может израсходовать ресурсов больше чем ему необходимо для получения максимальной энергии.&lt;br/&gt;Если выключено: бот расходует все ресурсы в ноль, при этом энергия не привишает максимум. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>Эффективное употребление</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -681,7 +710,7 @@
            <item>
             <widget class="QLabel" name="label_21">
              <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Количество энергии оасходуемое при выполнении команды &lt;span style=&quot; font-weight:600; color:#cbce06;&quot;&gt;ОТПАЧКОВАТЬ&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Количество энергии расходуемое при выполнении команды &lt;span style=&quot; font-weight:600; color:#cbce06;&quot;&gt;ОТПАЧКОВАТЬ&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
               <string>Цена клонирования</string>
@@ -779,7 +808,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QDoubleSpinBox" name="everyTernCostBox">
+            <widget class="QDoubleSpinBox" name="everyTurnCostBox">
              <property name="maximum">
               <double>10000.000000000000000</double>
              </property>

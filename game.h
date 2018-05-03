@@ -19,14 +19,17 @@ class Game : public QObject
     Q_OBJECT
 public:
     enum DisplayMode{
-        Commands,
+        Style,
         Energy,
-        Genomdiff
+        KillCount,
+        CloneCount,
+        DefenceAmount,
+        LongLiveAmount
     };
 
     static Game* singleGame;
 
-    static uchar ternsToUpdateInSkipMode;
+    static uchar turnsToUpdateInSkipMode;
 
     Cell ***world;
     static const unsigned short worldWidth;
@@ -41,15 +44,15 @@ public:
     QReadWriteLock locker;
 
     bool isPlaying = false;
-    bool inTern = false;
+    bool inTurn = false;
     bool skipDisplay = false;
 
-    uint currentTern = 0;
-    uint ternsPerSecond = 0;
+    uint currentTurn = 0;
+    uint turnsPerSecond = 0;
     uint aliveBotsCount = 0;
     uint deadBotsCount = 0;
 
-    void tern();
+    void turn();
 
 
     Bot **botsToDoSimpleThings = nullptr;
@@ -63,6 +66,7 @@ public:
 
 
 
+    int test();
 
     void resetWorld();
     QCPColorMap *colorMap;
@@ -70,11 +74,12 @@ public:
     void drawWorld();
 
 signals:
-    void updateLabels(uint currentTern,uint aliveBots,uint deadBots);
+    void updateLabels(uint currentTurn,uint aliveBots,uint deadBots);
     void emitReplotWorld(QCustomPlot::RefreshPriority);
 public slots:
     void infinitGamePlaying();
-    void playOneTern();
+    void playOneTurn();
+    void recalculateMineralsProductivable();
 };
 
 #endif // GAME_H
