@@ -14,6 +14,8 @@ public:
         CHANGEDIRPOSITIVE,
         CHANGEDIRNEGAITIVE,
 
+        SUICIDE,
+
         PHOTO,
 
         ATTACK,
@@ -140,6 +142,9 @@ public:
     static bool captureAttack;
     static bool effectiveEat;
 
+    static float defenceKof;
+    static float longLiveKof;
+
     Bot();
     Bot(unsigned short x,unsigned short y);
     ~Bot();
@@ -188,7 +193,6 @@ public:
     float mineralsUser = 0;
     float tallowUser = 0;
 
-    float genomDifference = 0;
     uint turnCount = 0;
     uint cloneCount = 0;
     uint killCount = 0;

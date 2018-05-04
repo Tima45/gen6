@@ -42,6 +42,9 @@ WorldParametersDialog::WorldParametersDialog(QWidget *parent) :
     ui->effectiveEatBox->setChecked(Bot::effectiveEat);
     ui->captureAttackBox->setChecked(Bot::captureAttack);
 
+    ui->defenceKofBox->setValue(Bot::defenceKof);
+    ui->longLiveKofBox->setValue(Bot::longLiveKof);
+
 
 }
 
@@ -92,5 +95,8 @@ void WorldParametersDialog::on_buttonBox_accepted()
 
     Bot::effectiveEat = ui->effectiveEatBox->isChecked();
     Bot::captureAttack = ui->captureAttackBox->isChecked();
+
+    Bot::defenceKof = ui->defenceKofBox->value();
+    Bot::longLiveKof = ui->longLiveKofBox->value();
 
 }

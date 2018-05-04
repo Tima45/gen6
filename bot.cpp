@@ -42,6 +42,9 @@ float Bot::mutationSpeedOfParamets = 0.12;
 bool Bot::captureAttack = false;
 bool Bot::effectiveEat = true;
 
+float Bot::defenceKof = 1;
+float Bot::longLiveKof = 1;
+
 uchar* Bot::tempDirections = new uchar[8];
 
 
@@ -52,6 +55,7 @@ QString Bot::genomCommandsToString(Bot::GenomCommands value)
         case GO                    : return "ИДИ";
         case CHANGEDIRPOSITIVE     : return "ВЕРТИСЬ ПРОТИВ";
         case CHANGEDIRNEGAITIVE    : return "ВЕРТИСЬ ПО";
+        case SUICIDE               : return "САМОУБИЙСТВО";
         case PHOTO                 : return "ФОТО";
         case ATTACK                : return "АТАКА";
         case EATSUGAR              : return "ЕШЬ САХАР";
@@ -122,12 +126,12 @@ QString Bot::genomCommandsToString(Bot::GenomCommands value)
 
 float Bot::defenceFromDefenceMinerals(float minerals)
 {
-    return minerals/(1.0+minerals);
+    return minerals/(defenceKof+minerals);
 }
 
 float Bot::longLiveValueFromSugar(float sugar)
 {
-    return sugar/(1.0+sugar);
+    return sugar/(longLiveKof+sugar);
 }
 
 Bot::Bot() : Cell()
@@ -314,7 +318,7 @@ void Bot::doSimpleIntention()
             case PHOTO:{
                 float awayFromCenter = sqrt(powf(x-Game::worldWidth/2.0,2.0)+powf(y-Game::worldHeight/2.0,2.0));
                 if(awayFromCenter < photoSugarBorder){
-                    float newSugar = (photoSugarMax-photoSugarMin)*((photoSugarBorder-awayFromCenter)/photoSugarBorder);
+                    float newSugar = (photoSugarMax-photoSugarMin)*((photoSugarBorder-awayFromCenter)/photoSugarBorder) + photoSugarMin;
                     carrySugar += newSugar;
                     payForPhoto();
                 }
@@ -439,6 +443,10 @@ void Bot::doSimpleIntention()
                 }
                 break;
             }
+            case SUICIDE:{
+                health = -1;
+                break;
+            }
         }
         payForLive();
     }
@@ -500,7 +508,7 @@ void Bot::doAttackIntention()
         if(Game::singleGame->world[toHitY][toHitX]->childType == Cell::bot){
             Bot* otherBot = (Bot*)Game::singleGame->world[toHitY][toHitX];
             float healthBefore = otherBot->health;
-            otherBot->health -= damage*(1.0-(defenceFromDefenceMinerals(defenceMinerals)));
+            otherBot->health -= damage*(1.0-(defenceFromDefenceMinerals(otherBot->defenceMinerals)));
             if(healthBefore > 0 && otherBot->health <= 0){
                 killCount++;
             }
@@ -599,7 +607,6 @@ void Bot::doCloneIntention()
             newBot->shareSugarKof = shareSugarKof;
             newBot->shareTallowKof = shareTallowKof;
 
-            newBot->genomDifference = 0;
             newBot->photoUser = photoUser;
             newBot->mineralsUser = mineralsUser;
             newBot->tallowUser = tallowUser;
@@ -739,41 +746,26 @@ uchar Bot::genomDifferenceFrom(Bot *otherBot)
 
 void Bot::payForLive()
 {
-    defenceMinerals -= defenceCoolDown;
-    if(defenceMinerals < 0){
-        defenceMinerals = 0;
-    }
+    if(health > 0){
+        defenceMinerals -= defenceCoolDown;
+        if(defenceMinerals < 0){
+            defenceMinerals = 0;
+        }
 
-    longLiveSugar -= longLiveCoolDown;
-    if(longLiveSugar < 0){
-        longLiveSugar = 0;
-    }
+        longLiveSugar -= longLiveCoolDown;
+        if(longLiveSugar < 0){
+            longLiveSugar = 0;
+        }
 
-    energy -= everyTurnCost;
-    turnCount++;
-    if(turnCount >= botsliveTime){
-        energy -= oldCost*(turnCount-botsliveTime)*(1-(longLiveValueFromSugar(longLiveSugar)));
-    }
-    if(energy <= 0){
-        health += (energy*(1-(longLiveValueFromSugar(longLiveSugar))));
-    }
-/*
-    genomDifference = 0;
-    uchar botsAround = 0;
-
-    for(uchar dir = 0; dir < 8; dir++){
-        unsigned short lookX = x;
-        unsigned short lookY = y;
-        directionToXY((Directions)dir,lookX,lookY);
-        if(Game::singleGame->world[lookY][lookX]->childType == Cell::bot){
-            genomDifference += genomDifferenceFrom((Bot*)Game::singleGame->world[lookY][lookX])/(genomSize);
-            botsAround++;
+        energy -= everyTurnCost;
+        turnCount++;
+        if(turnCount >= botsliveTime){
+            energy -= oldCost*(turnCount-botsliveTime)*(1-(longLiveValueFromSugar(longLiveSugar)));
+        }
+        if(energy <= 0){
+            health += (energy*(1-(longLiveValueFromSugar(longLiveSugar))));
         }
     }
-    if(botsAround > 0){
-        genomDifference /= botsAround;
-    }*/
-
 }
 
 void Bot::payForMove()

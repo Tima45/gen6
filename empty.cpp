@@ -45,7 +45,7 @@ void Empty::mineralsGrowUp()
 void Empty::recalculateGrowSpeed(float awayFromCenter)
 {
     if(awayFromCenter > mineralsGrowBorder){
-        mineralsGrowSpeed = (mineralsGrowSpeedMax-mineralsGrowSpeedMin)*(1-(awayFromCenter-mineralsGrowBorder)/sqrt(powf(Game::worldWidth/2.0,2.0)+powf(Game::worldHeight/2.0,2.0)));
+        mineralsGrowSpeed = (mineralsGrowSpeedMax-mineralsGrowSpeedMin)*(1-(awayFromCenter-mineralsGrowBorder)/sqrt(powf(Game::worldWidth/2.0,2.0)+powf(Game::worldHeight/2.0,2.0))) + mineralsGrowSpeedMin;
     }else{
         mineralsGrowSpeed = 0;
     }
@@ -54,7 +54,7 @@ void Empty::recalculateGrowSpeed(float awayFromCenter)
 void Empty::recalculateLocalMineralsMax(float awayFromCenter)
 {
     if(awayFromCenter > mineralsGrowBorder){
-        localMineralsMax = (mineralsMax-mineralsMin)*(awayFromCenter-mineralsGrowBorder)/sqrt(powf(Game::worldWidth/2.0,2.0)+powf(Game::worldHeight/2.0,2.0));
+        localMineralsMax = (mineralsMax-mineralsMin)*(awayFromCenter-mineralsGrowBorder)/sqrt(powf(Game::worldWidth/2.0,2.0)+powf(Game::worldHeight/2.0,2.0)) + mineralsMin;
     }else{
         localMineralsMax = 0;
     }
@@ -64,7 +64,7 @@ void Empty::recalculateProductivable()
 {
     float awayFromCenter = sqrt(powf(x-Game::worldWidth/2.0,2.0)+powf(y-Game::worldHeight/2.0,2.0));
     if(awayFromCenter > mineralsGrowBorder){
-        producive = 1.0*rand()/RAND_MAX < (produciveProbabilityMax-produciveProbabilityMin)*(awayFromCenter-mineralsGrowBorder)/sqrt(powf(Game::worldWidth/2.0,2.0)+powf(Game::worldHeight/2.0,2.0)) ? true : false;
+        producive = 1.0*rand()/RAND_MAX < (produciveProbabilityMax-produciveProbabilityMin)*(awayFromCenter-mineralsGrowBorder)/sqrt(powf(Game::worldWidth/2.0,2.0)+powf(Game::worldHeight/2.0,2.0)) + produciveProbabilityMin ? true : false;
     }else{
         producive = false;
     }

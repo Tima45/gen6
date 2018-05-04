@@ -33,4 +33,7 @@ const double DoubleColors::DefenceMaxColor = 1;
 const double DoubleColors::LongLiveMinColor = 0.13;
 const double DoubleColors::LongLiveMaxColor = 1;
 
+const double DoubleColors::AmountMinColor = 0.13;
+const double DoubleColors::AmountMaxColor = 1;
+
 

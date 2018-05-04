@@ -7,6 +7,7 @@
 #include <QTime>
 #include <QThread>
 #include <QLinkedList>
+#include <QDataStream>
 #include "plot/qcustomplot.h"
 #include "bot.h"
 #include "empty.h"
@@ -24,7 +25,10 @@ public:
         KillCount,
         CloneCount,
         DefenceAmount,
-        LongLiveAmount
+        LongLiveAmount,
+        SugarAmount,
+        MineralsAmount,
+        TallowAmount
     };
 
     static Game* singleGame;
@@ -65,9 +69,6 @@ public:
     uint botsToCloneCount = 0;
 
 
-
-    int test();
-
     void resetWorld();
     QCPColorMap *colorMap;
     DisplayMode displayMode;
@@ -80,6 +81,8 @@ public slots:
     void infinitGamePlaying();
     void playOneTurn();
     void recalculateMineralsProductivable();
+    void saveWorld(QDataStream &str);
+    void loadWorld(QDataStream &str);
 };
 
 #endif // GAME_H

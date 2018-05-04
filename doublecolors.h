@@ -35,6 +35,9 @@ public:
     static const double LongLiveMinColor;
     static const double LongLiveMaxColor;
 
+    static const double AmountMinColor;
+    static const double AmountMaxColor;
+
 };
 
 #endif // DOUBLECOLORS_H

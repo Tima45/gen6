@@ -11,6 +11,9 @@
 #include <QTimer>
 #include <QListWidgetItem>
 #include "worldparametersdialog.h"
+#include <QFileDialog>
+#include <QFile>
+#include <QDataStream>
 
 
 namespace Ui {
@@ -39,6 +42,7 @@ public:
     QCPColorGradient cloneGradient;
     QCPColorGradient defenceGradient;
     QCPColorGradient longLiveGradient;
+    QCPColorGradient amountGradient;
 
 
     QCPItemRect *cursor;
@@ -82,9 +86,14 @@ private slots:
 
     void on_worldParameternsButton_clicked();
 
+    void on_saveWorldButton_clicked();
+
+    void on_loadWorldButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     int lastTurn = 0;
+    void stopGame();
 };
 
 #endif // MAINWINDOW_H

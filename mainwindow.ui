@@ -176,7 +176,7 @@
          <item row="3" column="1">
           <widget class="QComboBox" name="comboBox">
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string/>
            </property>
            <item>
             <property name="text">
@@ -206,6 +206,21 @@
            <item>
             <property name="text">
              <string>Баф долголетия</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Количество сахара</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Количество минералов</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Количество жира</string>
             </property>
            </item>
           </widget>

@@ -140,6 +140,14 @@ void MainWindow::initPlot()
     longLiveGradient.setColorStopAt(DoubleColors::DefenceMinColor,QColor(QColor(175,68,15)));
     longLiveGradient.setColorStopAt(DoubleColors::DefenceMaxColor,QColor(QColor(255,255,0)));
 
+    amountGradient.clearColorStops();
+    amountGradient.setColorInterpolation(QCPColorGradient::ColorInterpolation::ciRGB);
+    amountGradient.setColorStopAt(DoubleColors::MineralsMinColor,QColor(255,255,255));
+    amountGradient.setColorStopAt(DoubleColors::MineralsMaxColor,QColor(128,128,255));
+    amountGradient.setColorStopAt(DoubleColors::DeadBotColor,QColor(139,94,73));
+    amountGradient.setColorStopAt(DoubleColors::DefenceMinColor,QColor(QColor(175,68,15)));
+    amountGradient.setColorStopAt(DoubleColors::DefenceMaxColor,QColor(QColor(255,255,0)));
+
     //----
     colorMap->setGradient(styleGradient);
     colorMap->data()->setCell(0,0,0);
@@ -197,11 +205,8 @@ void MainWindow::initPlot()
 
 void MainWindow::on_newWorldButton_clicked()
 {
-    locker.lockForWrite();
-    game->isPlaying = false;
-    locker.unlock();
+    stopGame();
     this->thread()->msleep(10);
-    ui->startStopButton->setText("Старт");
     if(QMessageBox::question(this,"Старт нового мира","Это приведет к удалению текущего мира. Удалять?") == QMessageBox::Yes){
         game->resetWorld();
         game->drawWorld();
@@ -452,6 +457,11 @@ void MainWindow::on_comboBox_currentIndexChanged(int index)
             colorMap->setGradient(longLiveGradient);
             break;
         }
+        case 6:
+        case 7:
+        case 8:{
+            colorMap->setGradient(amountGradient);
+        }
     }
     if(!game->isPlaying){
         game->drawWorld();
@@ -469,7 +479,7 @@ void MainWindow::on_rescaleButton_clicked()
 
 void MainWindow::on_nextTurnButton_clicked()
 {
-    game->isPlaying = false;
+    stopGame();
     emit playOneTurn();
     ui->startStopButton->setText("Старт");;
 }
@@ -528,12 +538,101 @@ void MainWindow::displayBotInfo(Bot *bot)
 
 void MainWindow::on_worldParameternsButton_clicked()
 {
-    locker.lockForWrite();
-    game->isPlaying = false;
-    locker.unlock();
-    ui->startStopButton->setText("Старт");
+    stopGame();
     WorldParametersDialog *dialog = new WorldParametersDialog();
     dialog->setAttribute(Qt::WA_ShowModal);
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->show();
+}
+
+void MainWindow::stopGame()
+{
+    locker.lockForWrite();
+    game->isPlaying = false;
+    locker.unlock();
+    ui->startStopButton->setText("Старт");
+}
+
+void MainWindow::on_saveWorldButton_clicked()
+{
+    stopGame();
+
+    QString filePath = QFileDialog::getSaveFileName(this,"Сохранить мир","","GenWorld (*.gw);");
+    if(!filePath.isEmpty()){
+        QFile f(filePath);
+        f.open(QIODevice::WriteOnly);
+        QDataStream str(&f);
+
+        str << (int)6; //version
+        QVector<QCPGraphData>::const_iterator i;
+        str << aliveGraph->dataCount();
+        for(i = aliveGraph->data()->constBegin(); i != aliveGraph->data()->constEnd(); i++){
+            str << i->key;
+            str << i->value;
+        }
+        str << deadGraph->dataCount();
+        for(i = deadGraph->data()->constBegin(); i != deadGraph->data()->constEnd(); i++){
+            str << i->key;
+            str << i->value;
+        }
+        game->saveWorld(str);
+        f.close();
+    }
+}
+
+void MainWindow::on_loadWorldButton_clicked()
+{
+    stopGame();
+    QString filePath = QFileDialog::getOpenFileName(this,"Загрузить мир","","GenWorld (*.gw);");
+    if(!filePath.isEmpty()){
+        QFile f(filePath);
+        tracking = false;
+        try{
+            if(!f.open(QIODevice::ReadOnly)){
+                throw 0;
+            }
+            QDataStream str(&f);
+
+            int version = 0;
+            str >> version;
+            if(version != 6){
+                throw 0;
+            }
+            QVector<QCPGraphData>::const_iterator i;
+            int aliveBotsCount = 0;
+            str >> aliveBotsCount;
+            aliveGraph->data()->clear();
+            for(int i = 0; i < aliveBotsCount; i++){
+                double key;
+                double value;
+                str >> key;
+                str >> value;
+                aliveGraph->addData(key,value);
+            }
+            deadGraph->data()->clear();
+            int deadBotsCount = 0;
+            str >> deadBotsCount;
+            for(int i = 0; i < deadBotsCount; i++){
+                double key;
+                double value;
+                str >> key;
+                str >> value;
+                deadGraph->addData(key,value);
+            }
+            ui->aliveDeadPlot->rescaleAxes();
+            ui->aliveDeadPlot->replot();
+
+
+            game->loadWorld(str);
+            ui->turnLabel->setText(QString::number(game->currentTurn));
+            ui->aliveCountLabel->setText(QString::number(game->aliveBotsCount));
+            ui->deadCountLabel->setText(QString::number(game->deadBotsCount));
+            game->drawWorld();
+            ui->worldPlot->replot();
+            f.close();
+        }
+        catch(int a){
+            QMessageBox::critical(this,"Ошибка","Не удалось загрузить файл");
+        }
+    }
 }
