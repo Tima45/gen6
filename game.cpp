@@ -148,6 +148,7 @@ void Game::resetWorld()
                     Empty *cell = (Empty*)world[y][x];
                     cell->minerals = 0;
                     cell->setCoords(x,y);
+                    cell->recalculateProductivable();
                 }else if(world[y][x]->childType == Cell::bot){
                     botHell.append((Bot*)world[y][x]);
 

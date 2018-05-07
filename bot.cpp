@@ -587,7 +587,6 @@ void Bot::doCloneIntention()
             newBot->health = 100;
             newBot->energy = startBotEnergy;
 
-            newBot->carryMinerals = 0;
             newBot->carrySugar = 0;
             newBot->carryTallow = 0;
 
