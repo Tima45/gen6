@@ -573,6 +573,7 @@ void Bot::doCloneIntention()
             Game::singleGame->world[lookY][lookX]->tracking = false;
 
             Bot* newBot = Game::singleGame->botHell.takeLast();
+            newBot->carryMinerals = 0;
             newBot->carryMinerals += ((Empty*)Game::singleGame->world[lookY][lookX])->minerals;
 
             Game::singleGame->emptyHell.append((Empty*)Game::singleGame->world[lookY][lookX]);

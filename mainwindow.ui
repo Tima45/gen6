@@ -228,7 +228,7 @@
          <item row="3" column="0">
           <widget class="QLabel" name="label_5">
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Стиль: отрисовка ботов цветом по стилю получения энергии(&lt;span style=&quot; font-weight:600; color:#168702;&quot;&gt;Зеленый&lt;/span&gt; - фотосинтез, &lt;span style=&quot; font-weight:600; color:#940000;&quot;&gt;Красный&lt;/span&gt; - трупы, &lt;span style=&quot; font-weight:600; color:#0b1fd1;&quot;&gt;Синий&lt;/span&gt; - минералы)&lt;/p&gt;&lt;p&gt;Энергия: отрисовка ботов по количеству энергии.&lt;/p&gt;&lt;p&gt;Разница генома: отрисовка ботов в соответсвии с их разницой в геноме относительно окружающих.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string/>
            </property>
            <property name="text">
             <string>Режим отображения</string>
@@ -267,6 +267,27 @@
         </property>
         <layout class="QGridLayout" name="gridLayout_4">
          <item row="0" column="2">
+          <widget class="QPushButton" name="nextTurnButton">
+           <property name="maximumSize">
+            <size>
+             <width>18</width>
+             <height>18</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>6</pointsize>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;На один ход вперед&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>&gt;</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="4">
           <spacer name="horizontalSpacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -293,7 +314,7 @@
             </font>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Отцентровать&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Отцентровать мир&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
             <string>[ ]</string>
@@ -301,7 +322,7 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QPushButton" name="nextTurnButton">
+          <widget class="QPushButton" name="clearGraphButton">
            <property name="maximumSize">
             <size>
              <width>18</width>
@@ -314,10 +335,10 @@
             </font>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;На один ход вперед&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Очистить график живых и мертвых&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
-            <string>&gt;</string>
+            <string>c</string>
            </property>
           </widget>
          </item>
@@ -979,7 +1000,7 @@
          <string notr="true">color: rgb(179, 179, 179);</string>
         </property>
         <property name="text">
-         <string>v6</string>
+         <string>v6.1</string>
         </property>
        </widget>
       </item>

@@ -22,7 +22,6 @@ Empty::Empty() : Cell()
 Empty::Empty(unsigned short x, unsigned short y):Cell(x,y)
 {
     childType = Cell::empty;
-    randVal = 0.1+(rand()%10000)/10000.0;
 
     recalculateProductivable();
 }
@@ -38,7 +37,7 @@ void Empty::setCoords(unsigned short x, unsigned short y)
 void Empty::mineralsGrowUp()
 {
     if(producive){
-        minerals += minerals < localMineralsMax ? mineralsGrowSpeed*randVal : 0;
+        minerals += minerals < localMineralsMax ? mineralsGrowSpeed : 0;
     }
 }
 
@@ -64,7 +63,9 @@ void Empty::recalculateProductivable()
 {
     float awayFromCenter = sqrt(powf(x-Game::worldWidth/2.0,2.0)+powf(y-Game::worldHeight/2.0,2.0));
     if(awayFromCenter > mineralsGrowBorder){
-        producive = 1.0*rand()/RAND_MAX < (produciveProbabilityMax-produciveProbabilityMin)*(awayFromCenter-mineralsGrowBorder)/sqrt(powf(Game::worldWidth/2.0,2.0)+powf(Game::worldHeight/2.0,2.0)) + produciveProbabilityMin ? true : false;
+        double randvalue = 1.0*rand()/RAND_MAX;
+        double probe = (produciveProbabilityMax-produciveProbabilityMin)*(awayFromCenter-mineralsGrowBorder)/sqrt(powf(Game::worldWidth/2.0,2.0)+powf(Game::worldHeight/2.0,2.0)) + produciveProbabilityMin;
+        producive = randvalue < probe;
     }else{
         producive = false;
     }

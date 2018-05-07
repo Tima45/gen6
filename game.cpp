@@ -495,7 +495,6 @@ void Game::saveWorld(QDataStream &str)
         str << cell->minerals;
         str << cell->localMineralsMax;
         str << cell->mineralsGrowSpeed;
-        str << cell->randVal;
     }
 }
 
@@ -599,7 +598,6 @@ void Game::loadWorld(QDataStream &str)
         str >> cell->minerals;
         str >> cell->localMineralsMax;
         str >> cell->mineralsGrowSpeed;
-        str >> cell->randVal;
         world[cell->y][cell->x] = cell;
     }
 }

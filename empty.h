@@ -31,7 +31,6 @@ public:
     void recalculateLocalMineralsMax(float awayFromCenter);
     void recalculateProductivable();
 
-    float randVal = 0;
     void clearCell();
 };
 

@@ -563,7 +563,7 @@ void MainWindow::on_saveWorldButton_clicked()
         f.open(QIODevice::WriteOnly);
         QDataStream str(&f);
 
-        str << (int)6; //version
+        str << (int)61; //version
         QVector<QCPGraphData>::const_iterator i;
         str << aliveGraph->dataCount();
         for(i = aliveGraph->data()->constBegin(); i != aliveGraph->data()->constEnd(); i++){
@@ -595,7 +595,7 @@ void MainWindow::on_loadWorldButton_clicked()
 
             int version = 0;
             str >> version;
-            if(version != 6){
+            if(version != 61){
                 throw 0;
             }
             QVector<QCPGraphData>::const_iterator i;
@@ -635,4 +635,11 @@ void MainWindow::on_loadWorldButton_clicked()
             QMessageBox::critical(this,"Ошибка","Не удалось загрузить файл");
         }
     }
+}
+
+void MainWindow::on_clearGraphButton_clicked()
+{
+    aliveGraph->data()->clear();
+    deadGraph->data()->clear();
+    deadGraph->addData(game->currentTurn,0);
 }

@@ -90,6 +90,8 @@ private slots:
 
     void on_loadWorldButton_clicked();
 
+    void on_clearGraphButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     int lastTurn = 0;
