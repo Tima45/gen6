@@ -80,7 +80,7 @@ signals:
 public slots:
     void infinitGamePlaying();
     void playOneTurn();
-    void recalculateMineralsProductivable();
+    void recalculateMinerals();
     void saveWorld(QDataStream &str);
     void loadWorld(QDataStream &str);
 };

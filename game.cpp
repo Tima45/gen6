@@ -128,7 +128,7 @@ void Game::turn()
         locker.unlock();
         emit updateLabels(currentTurn,aliveBotsCount,deadBotsCount);
         drawWorld();
-        emit emitReplotWorld(QCustomPlot::rpQueuedReplot);
+        emit emitReplotWorld(QCustomPlot::rpQueuedRefresh);
     }
     locker.lockForWrite();
     inTurn = false;
@@ -389,12 +389,13 @@ void Game::playOneTurn()
     isPlaying = false;
 }
 
-void Game::recalculateMineralsProductivable()
+void Game::recalculateMinerals()
 {
     for(unsigned short y = 0; y < worldHeight; y++){
         for(unsigned short x = 0; x < worldWidth;x++){
             if(world[y][x]->childType == Cell::empty){
                 Empty *cell = (Empty*)world[y][x];
+                cell->setCoords(x,y);
                 cell->recalculateProductivable();
             }
         }

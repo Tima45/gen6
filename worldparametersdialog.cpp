@@ -80,22 +80,29 @@ void WorldParametersDialog::on_buttonBox_accepted()
     Bot::genomMutationChance = ui->genomMutationChanceBox->value();
     Bot::parametrsMutationChance = ui->parametrsMutationChanceBox->value();
     Bot::mutationSpeedOfParamets = ui->mutationSpeedOfParametsBox->value();
-    Empty::mineralsMax = ui->mineralsMaxBox->value();
-    Empty::mineralsMin = ui->mineralsMinBox->value();
-    Empty::mineralsGrowSpeedMax = ui->mineralsGrowSpeedMaxBox->value();
-    Empty::mineralsGrowSpeedMin = ui->mineralsGrowSpeedMinBox->value();
 
-    if(Empty::produciveProbabilityMax != ui->produciveProbabilityMaxBox->value() || Empty::produciveProbabilityMin != ui->produciveProbabilityMinBox->value()){
+
+    if(Empty::mineralsMax != ui->mineralsMaxBox->value()||
+       Empty::mineralsMin != ui->mineralsMinBox->value()||
+       Empty::mineralsGrowSpeedMax != ui->mineralsGrowSpeedMaxBox->value()||
+       Empty::mineralsGrowSpeedMin != ui->mineralsGrowSpeedMinBox->value()||
+       Empty::produciveProbabilityMax != ui->produciveProbabilityMaxBox->value()||
+       Empty::produciveProbabilityMin != ui->produciveProbabilityMinBox->value()||
+       Empty::mineralsGrowBorder != ui->mineralsGrowBorderBox->value())
+    {
+        Empty::mineralsMax = ui->mineralsMaxBox->value();
+        Empty::mineralsMin = ui->mineralsMinBox->value();
+        Empty::mineralsGrowSpeedMax = ui->mineralsGrowSpeedMaxBox->value();
+        Empty::mineralsGrowSpeedMin = ui->mineralsGrowSpeedMinBox->value();
         Empty::produciveProbabilityMax = ui->produciveProbabilityMaxBox->value();
         Empty::produciveProbabilityMin = ui->produciveProbabilityMinBox->value();
-        Game::singleGame->recalculateMineralsProductivable();
+        Empty::mineralsGrowBorder = ui->mineralsGrowBorderBox->value();
+        Game::singleGame->recalculateMinerals();
     }
 
-    Empty::mineralsGrowBorder = ui->mineralsGrowBorderBox->value();
 
     Bot::effectiveEat = ui->effectiveEatBox->isChecked();
     Bot::captureAttack = ui->captureAttackBox->isChecked();
-
     Bot::defenceKof = ui->defenceKofBox->value();
     Bot::longLiveKof = ui->longLiveKofBox->value();
 

@@ -996,6 +996,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0b0b0b;&quot;&gt;Версия приложения 6.1&lt;br/&gt;Версия Qt 5.8&lt;br/&gt;Тимофей&lt;br/&gt;timaisabrony@gmail.com&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="styleSheet">
          <string notr="true">color: rgb(179, 179, 179);</string>
         </property>
