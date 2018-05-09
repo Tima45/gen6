@@ -43,7 +43,7 @@ bool Bot::captureAttack = false;
 bool Bot::effectiveEat = true;
 
 float Bot::defenceKof = 1;
-float Bot::longLiveKof = 1;
+float Bot::longLiveKof = 10;
 
 uchar* Bot::tempDirections = new uchar[8];
 
@@ -69,7 +69,7 @@ QString Bot::genomCommandsToString(Bot::GenomCommands value)
         case USETALLOW             : return "ИСПОЛЬЗУЙ ЖИР";
         case LOOKENERGY            : return "ПРОВЕРЬ ЭНЕРГИЮ";
         case LOOKUP                : return "ПОСМОТРИ ВПЕРЕД";
-        case CLONE                 : return "ОТПАЧКОВАТЬ";
+        case CLONE                 : return "ОТПОЧКОВАТЬ";
         case MOVEINDEX1            : return "ПЕРЕХОД НА 1";
         case MOVEINDEX2            : return "ПЕРЕХОД НА 2";
         case MOVEINDEX3            : return "ПЕРЕХОД НА 3";

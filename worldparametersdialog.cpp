@@ -6,6 +6,15 @@ WorldParametersDialog::WorldParametersDialog(QWidget *parent) :
     ui(new Ui::WorldParametersDialog)
 {
     ui->setupUi(this);
+}
+
+WorldParametersDialog::~WorldParametersDialog()
+{
+    delete ui;
+}
+
+void WorldParametersDialog::loadParametres()
+{
     ui->toleranceBox->setValue(Bot::tolerance);
     ui->photoSugarMaxBox->setValue(Bot::photoSugarMax);
     ui->photoSugarMinBox->setValue(Bot::photoSugarMin);
@@ -44,13 +53,6 @@ WorldParametersDialog::WorldParametersDialog(QWidget *parent) :
 
     ui->defenceKofBox->setValue(Bot::defenceKof);
     ui->longLiveKofBox->setValue(Bot::longLiveKof);
-
-
-}
-
-WorldParametersDialog::~WorldParametersDialog()
-{
-    delete ui;
 }
 
 void WorldParametersDialog::on_buttonBox_accepted()
@@ -105,5 +107,4 @@ void WorldParametersDialog::on_buttonBox_accepted()
     Bot::captureAttack = ui->captureAttackBox->isChecked();
     Bot::defenceKof = ui->defenceKofBox->value();
     Bot::longLiveKof = ui->longLiveKofBox->value();
-
 }

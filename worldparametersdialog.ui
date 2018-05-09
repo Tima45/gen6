@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>567</width>
-    <height>725</height>
+    <height>746</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -58,6 +58,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="tallowToEnergyKofBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>10000.000000000000000</double>
              </property>
@@ -79,6 +82,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="mineralsToEnergyKofBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>10000.000000000000000</double>
              </property>
@@ -100,6 +106,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="sugarToEnergyKofBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>10000.000000000000000</double>
              </property>
@@ -121,6 +130,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="tallowToHealthKofBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>10000.000000000000000</double>
              </property>
@@ -189,7 +201,11 @@
             </widget>
            </item>
            <item>
-            <widget class="QDoubleSpinBox" name="oldCostBox"/>
+            <widget class="QDoubleSpinBox" name="oldCostBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
@@ -234,6 +250,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="mutationSpeedOfParametsBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>1.000000000000000</double>
              </property>
@@ -255,6 +274,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="minEnergyToCloneBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>100.000000000000000</double>
              </property>
@@ -276,6 +298,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="parametrsMutationChanceBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>1.000000000000000</double>
              </property>
@@ -297,6 +322,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="startBotEnergyBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>100.000000000000000</double>
              </property>
@@ -318,6 +346,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="genomMutationChanceBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>1.000000000000000</double>
              </property>
@@ -339,6 +370,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="cloneCostBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>100.000000000000000</double>
              </property>
@@ -360,6 +394,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="tallowFromDeadBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>100000.000000000000000</double>
              </property>
@@ -381,6 +418,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="healthMaxBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>100000.000000000000000</double>
              </property>
@@ -429,6 +469,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="everyTurnCostBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>10000.000000000000000</double>
              </property>
@@ -450,6 +493,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="moveCostBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>100000.000000000000000</double>
              </property>
@@ -471,6 +517,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="attackCostBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>100000.000000000000000</double>
              </property>
@@ -492,6 +541,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="photoCostBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>100000.000000000000000</double>
              </property>
@@ -546,6 +598,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="defenceKofBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>100000.000000000000000</double>
              </property>
@@ -573,6 +628,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="longLiveKofBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>100000.000000000000000</double>
              </property>
@@ -594,6 +652,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="defenceCoolDownBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>100000.000000000000000</double>
              </property>
@@ -615,6 +676,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="longLiveCoolDownBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>100000.000000000000000</double>
              </property>
@@ -675,6 +739,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="damageBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
              <property name="maximum">
               <double>100000.000000000000000</double>
              </property>
@@ -737,6 +804,9 @@
           </item>
           <item>
            <widget class="QDoubleSpinBox" name="photoSugarMaxBox">
+            <property name="decimals">
+             <number>4</number>
+            </property>
             <property name="minimum">
              <double>0.010000000000000</double>
             </property>
@@ -761,6 +831,9 @@
           </item>
           <item>
            <widget class="QDoubleSpinBox" name="photoSugarMinBox">
+            <property name="decimals">
+             <number>4</number>
+            </property>
             <property name="minimum">
              <double>0.000000000000000</double>
             </property>
@@ -785,6 +858,9 @@
           </item>
           <item>
            <widget class="QDoubleSpinBox" name="photoSugarBorderBox">
+            <property name="decimals">
+             <number>4</number>
+            </property>
             <property name="maximum">
              <double>512.000000000000000</double>
             </property>
@@ -815,6 +891,9 @@
           </item>
           <item>
            <widget class="QDoubleSpinBox" name="mineralsMaxBox">
+            <property name="decimals">
+             <number>4</number>
+            </property>
             <property name="minimum">
              <double>0.010000000000000</double>
             </property>
@@ -839,6 +918,9 @@
           </item>
           <item>
            <widget class="QDoubleSpinBox" name="mineralsMinBox">
+            <property name="decimals">
+             <number>4</number>
+            </property>
             <property name="minimum">
              <double>0.000000000000000</double>
             </property>
@@ -863,6 +945,9 @@
           </item>
           <item>
            <widget class="QDoubleSpinBox" name="mineralsGrowSpeedMaxBox">
+            <property name="decimals">
+             <number>4</number>
+            </property>
             <property name="minimum">
              <double>0.010000000000000</double>
             </property>
@@ -887,6 +972,9 @@
           </item>
           <item>
            <widget class="QDoubleSpinBox" name="mineralsGrowSpeedMinBox">
+            <property name="decimals">
+             <number>4</number>
+            </property>
             <property name="minimum">
              <double>0.000000000000000</double>
             </property>
@@ -911,11 +999,14 @@
           </item>
           <item>
            <widget class="QDoubleSpinBox" name="produciveProbabilityMaxBox">
+            <property name="decimals">
+             <number>4</number>
+            </property>
             <property name="minimum">
              <double>0.000000000000000</double>
             </property>
             <property name="maximum">
-             <double>10000.000000000000000</double>
+             <double>1.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -935,11 +1026,14 @@
           </item>
           <item>
            <widget class="QDoubleSpinBox" name="produciveProbabilityMinBox">
+            <property name="decimals">
+             <number>4</number>
+            </property>
             <property name="minimum">
              <double>0.000000000000000</double>
             </property>
             <property name="maximum">
-             <double>10000.000000000000000</double>
+             <double>1.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -959,6 +1053,9 @@
           </item>
           <item>
            <widget class="QDoubleSpinBox" name="mineralsGrowBorderBox">
+            <property name="decimals">
+             <number>4</number>
+            </property>
             <property name="minimum">
              <double>0.000000000000000</double>
             </property>

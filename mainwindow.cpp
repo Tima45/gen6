@@ -37,15 +37,19 @@ MainWindow::MainWindow(QWidget *parent) :
 
     gameThread->start(QThread::NormalPriority);
 
+
+    dialog = new WorldParametersDialog();
+    dialog->setAttribute(Qt::WA_ShowModal);
 }
 
 MainWindow::~MainWindow()
 {
-    gameThread->terminate();
-
+    stopGame();
     this->thread()->msleep(10);
-    delete ui;
+    gameThread->terminate();
     gameThread->deleteLater();
+    dialog->deleteLater();
+    delete ui;
 }
 
 void MainWindow::initPlot()
@@ -180,7 +184,6 @@ void MainWindow::initPlot()
 
 
     QPen pt(QColor(10,10,255,100));
-    p.setWidth(1);
     pt.setStyle(Qt::DashLine);
     traceLeftTop->setPen(pt);
     traceRightBottom->setPen(pt);
@@ -189,8 +192,13 @@ void MainWindow::initPlot()
     traceLeftTop->setVisible(false);
     traceRightBottom->setVisible(false);
 
+
+    /*redPen = QPen(QColor(255,10,50));
+    redPen.setWidth(2);
+    blackPen = QPen(QColor(0,0,0));
+    blackPen.setWidth(2);*/
     dirArrow = new QCPItemLine(ui->worldPlot);
-    dirArrow->setPen(p);
+    //dirArrow->setPen(redPen);
     dirArrow->setLayer("mid");
     dirArrow->setVisible(false);
     dirArrow->setHead(QCPLineEnding::esSpikeArrow);
@@ -209,17 +217,30 @@ void MainWindow::initPlot()
     aliveGraph->setPen(QPen(QColor(Qt::green)));
     deadGraph->setPen(QPen(QColor(139,94,73)));
 
+    aliveTracer = new QCPItemTracer(ui->aliveDeadPlot);
+    aliveTracer->setPen(Qt::NoPen);
+    aliveTracer->setBrush(QBrush(QColor(Qt::green)));
+    aliveTracer->setStyle(QCPItemTracer::tsCircle);
+    aliveTracer->setGraph(aliveGraph);
+
+    deadTracer = new QCPItemTracer(ui->aliveDeadPlot);
+    deadTracer->setPen(Qt::NoPen);
+    deadTracer->setBrush(QBrush(QColor(139,94,73)));
+    deadTracer->setStyle(QCPItemTracer::tsCircle);
+    deadTracer->setGraph(deadGraph);
+
     ui->aliveDeadPlot->setInteraction(QCP::iRangeDrag, true);
     ui->aliveDeadPlot->setInteraction(QCP::iRangeZoom, true);
     ui->aliveDeadPlot->axisRect()->setRangeDrag(Qt::Horizontal);
     ui->aliveDeadPlot->axisRect()->setRangeZoom(Qt::Horizontal);
-    ui->aliveDeadPlot->xAxis->setRange(-300,50);
+    ui->aliveDeadPlot->xAxis->setRange(-1000,100);
 }
 
 void MainWindow::on_newWorldButton_clicked()
 {
     stopGame();
     this->thread()->msleep(10);
+
     if(QMessageBox::question(this,"Старт нового мира","Это приведет к удалению текущего мира. Удалять?") == QMessageBox::Yes){
         Game::singleGame().resetWorld();
         Game::singleGame().drawWorld();
@@ -227,6 +248,8 @@ void MainWindow::on_newWorldButton_clicked()
 
         aliveGraph->data()->clear();
         deadGraph->data()->clear();
+        lastTurn = 0;
+        ui->aliveDeadPlot->xAxis->setRange(-300,50);
     }
 
 }
@@ -253,6 +276,8 @@ void MainWindow::updateLabels(uint turn, uint alive, uint dead)
     ui->deadCountLabel->setText(QString::number(dead));
     aliveGraph->addData(turn,alive);
     deadGraph->addData(turn,dead);
+    aliveTracer->setGraphKey(turn);
+    deadTracer->setGraphKey(turn);
     ui->aliveDeadPlot->xAxis->setRange(ui->aliveDeadPlot->xAxis->range().lower+(turn-lastTurn),ui->aliveDeadPlot->xAxis->range().upper+(turn-lastTurn));
     ui->aliveDeadPlot->yAxis->rescale();
     ui->aliveDeadPlot->replot(QCustomPlot::rpQueuedReplot);
@@ -480,6 +505,14 @@ void MainWindow::on_comboBox_currentIndexChanged(int index)
             colorMap->setGradient(amountGradient);
         }
     }
+    /*
+    if(tracking){
+        if(index == Game::KillCount){
+            dirArrow->setPen(blackPen);
+        }else{
+            dirArrow->setPen(redPen);
+        }
+    }*/
     if(!Game::singleGame().isPlaying){
         Game::singleGame().drawWorld();
         ui->worldPlot->replot();
@@ -556,10 +589,9 @@ void MainWindow::displayBotInfo(Bot *bot)
 void MainWindow::on_worldParameternsButton_clicked()
 {
     stopGame();
-    WorldParametersDialog *dialog = new WorldParametersDialog();
-    dialog->setAttribute(Qt::WA_ShowModal);
-    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->loadParametres();
     dialog->show();
+
 }
 
 void MainWindow::stopGame()

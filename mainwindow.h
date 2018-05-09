@@ -25,6 +25,8 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+
+
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     QThread *gameThread;
@@ -52,6 +54,8 @@ public:
 
     QCPGraph *aliveGraph;
     QCPGraph *deadGraph;
+    QCPItemTracer *aliveTracer;
+    QCPItemTracer *deadTracer;
 
     QTimer *fpsTimer;
     uint lastFps = 0;
@@ -95,6 +99,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     int lastTurn = 0;
+    WorldParametersDialog *dialog;
     void stopGame();
 };
 

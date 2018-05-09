@@ -24,6 +24,9 @@ Game::Game(QObject *parent) : QObject(parent)
         botHell.append(new Bot(0,0));
         emptyHell.append(new Empty(0,0));
     }
+
+    botHell.takeLast(); // wtf???!!
+
     world = new Cell**[worldHeight];
     for(unsigned short y = 0; y < worldHeight; y++){
         world[y] = new Cell*[worldWidth];
@@ -168,16 +171,6 @@ void Game::resetWorld()
                 }
             }
         }
-
-        //<wtf>
-        if(true){
-            int test = 0;
-            while(test != 1){
-                botHell.takeLast();
-                test++;
-            }
-        }
-        //<wtf/>
         if(true){
             Bot* firstBot = botHell.takeLast();
             for(unsigned short i = 0; i < Bot::genomSize; i++){

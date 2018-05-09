@@ -17,6 +17,7 @@ class WorldParametersDialog : public QDialog
 public:
     explicit WorldParametersDialog(QWidget *parent = 0);
     ~WorldParametersDialog();
+    void loadParametres();
 
 private slots:
     void on_buttonBox_accepted();
