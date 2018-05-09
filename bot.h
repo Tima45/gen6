@@ -145,8 +145,8 @@ public:
     static float defenceKof;
     static float longLiveKof;
 
-    Bot();
     Bot(unsigned short x,unsigned short y);
+
     ~Bot();
     void clearBot();
     uchar recurtionCounter = 0;
@@ -206,8 +206,9 @@ public:
     void payForClone();
     void payForPhoto();
     void calculateLifeStyle();
-
-
+private:
+    Bot(const Bot &other);
+    Bot();
 
 };
 

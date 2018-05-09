@@ -31,7 +31,7 @@ public:
         TallowAmount
     };
 
-    static Game* singleGame;
+    static Game &singleGame();
 
     static uchar turnsToUpdateInSkipMode;
 

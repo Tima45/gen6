@@ -1,29 +1,26 @@
 #include "game.h"
 
 
-Game* Game::singleGame = nullptr;
 
 uchar Game::turnsToUpdateInSkipMode = 64;
 const unsigned short Game::worldWidth = 512;
 const unsigned short Game::worldHeight = 512;
 
+Game &Game::singleGame()
+{
+    static Game g(0);
+    return g;
+}
+
 Game::Game(QObject *parent) : QObject(parent)
 {
-    /*
-    botHell.reserve(worldWidth*worldHeight);
-    emptyHell.reserve(worldWidth*worldHeight);
-    */
-
-    if(singleGame == nullptr){
-        singleGame = this;
-    }
 
     botsToDoSimpleThings = new Bot*[worldWidth*worldHeight];
     botsToMove = new Bot*[worldWidth*worldHeight];
     botsToAttack = new Bot*[worldWidth*worldHeight];
     botsToClone = new Bot*[worldWidth*worldHeight];
 
-    for(int i = 0; i < worldWidth*worldHeight; i++){
+    for(int i = 0; i < worldWidth*worldHeight +1; i++){
         botHell.append(new Bot(0,0));
         emptyHell.append(new Empty(0,0));
     }
@@ -42,11 +39,23 @@ Game::Game(QObject *parent) : QObject(parent)
 
 Game::~Game()
 {
+    isPlaying = false;
+
     delete[] botsToDoSimpleThings;
     delete[] botsToMove;
     delete[] botsToAttack;
     delete[] botsToClone;
-    singleGame = nullptr;
+    for(int i = 0; i < botHell.count(); i++){
+        delete botHell.takeLast();
+    }
+    for(int i = 0; i < emptyHell.count(); i++){
+        delete emptyHell.takeLast();
+    }
+    for(unsigned short y = 0; y < worldHeight; y++){
+        for(unsigned short x = 0; x < worldWidth;x++){
+            delete world[y][x];
+        }
+    }
 }
 
 void Game::turn()
@@ -128,7 +137,7 @@ void Game::turn()
         locker.unlock();
         emit updateLabels(currentTurn,aliveBotsCount,deadBotsCount);
         drawWorld();
-        emit emitReplotWorld(QCustomPlot::rpQueuedRefresh);
+        emit emitReplotWorld(QCustomPlot::rpQueuedReplot);
     }
     locker.lockForWrite();
     inTurn = false;
@@ -160,7 +169,15 @@ void Game::resetWorld()
             }
         }
 
-
+        //<wtf>
+        if(true){
+            int test = 0;
+            while(test != 1){
+                botHell.takeLast();
+                test++;
+            }
+        }
+        //<wtf/>
         if(true){
             Bot* firstBot = botHell.takeLast();
             for(unsigned short i = 0; i < Bot::genomSize; i++){
@@ -377,6 +394,7 @@ void Game::infinitGamePlaying()
     while(isPlaying){
         locker.unlock();
         turn();
+        //this->thread()->msleep(10);
         locker.lockForRead();
     }
     locker.unlock();

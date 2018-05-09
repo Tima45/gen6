@@ -97,7 +97,7 @@ void WorldParametersDialog::on_buttonBox_accepted()
         Empty::produciveProbabilityMax = ui->produciveProbabilityMaxBox->value();
         Empty::produciveProbabilityMin = ui->produciveProbabilityMinBox->value();
         Empty::mineralsGrowBorder = ui->mineralsGrowBorderBox->value();
-        Game::singleGame->recalculateMinerals();
+        Game::singleGame().recalculateMinerals();
     }
 
 

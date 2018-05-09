@@ -12,19 +12,22 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->botGroupBox->setVisible(false);
 
     gameThread = new QThread;
-    game = new Game;
-    game->colorMap = colorMap;
-    game->moveToThread(gameThread);
 
-    connect(this,SIGNAL(startGame()),game,SLOT(infinitGamePlaying()),Qt::QueuedConnection);
-    connect(this,SIGNAL(playOneTurn()),game,SLOT(playOneTurn()),Qt::QueuedConnection);
-    connect(game,SIGNAL(updateLabels(uint,uint,uint)),this,SLOT(updateLabels(uint,uint,uint)),Qt::QueuedConnection);
+    Game::singleGame().colorMap = colorMap;
+    Game::singleGame().moveToThread(gameThread);
+
+
+
+    connect(this,SIGNAL(startGame()),&Game::singleGame(),SLOT(infinitGamePlaying()),Qt::QueuedConnection);
+    connect(this,SIGNAL(playOneTurn()),&Game::singleGame(),SLOT(playOneTurn()),Qt::QueuedConnection);
+    connect(&Game::singleGame(),SIGNAL(updateLabels(uint,uint,uint)),this,SLOT(updateLabels(uint,uint,uint)),Qt::QueuedConnection);
     qRegisterMetaType<QCustomPlot::RefreshPriority>("QCustomPlot::RefreshPriority");
-    connect(game,SIGNAL(emitReplotWorld(QCustomPlot::RefreshPriority)),ui->worldPlot,SLOT(replot(QCustomPlot::RefreshPriority)),Qt::QueuedConnection);
+    connect(&Game::singleGame(),SIGNAL(emitReplotWorld(QCustomPlot::RefreshPriority)),ui->worldPlot,SLOT(replot(QCustomPlot::RefreshPriority)),Qt::QueuedConnection);
 
-    gameThread->start();
-    game->resetWorld();
-    game->drawWorld();
+
+
+    Game::singleGame().resetWorld();
+    Game::singleGame().drawWorld();
 
 
     fpsTimer = new QTimer;
@@ -32,12 +35,16 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(fpsTimer,SIGNAL(timeout()),this,SLOT(fpsCount()));
     fpsTimer->start();
 
+    gameThread->start(QThread::NormalPriority);
+
 }
 
 MainWindow::~MainWindow()
 {
+    gameThread->terminate();
+
+    this->thread()->msleep(10);
     delete ui;
-    game->deleteLater();
     gameThread->deleteLater();
 }
 
@@ -201,6 +208,12 @@ void MainWindow::initPlot()
     deadGraph = ui->aliveDeadPlot->addGraph();
     aliveGraph->setPen(QPen(QColor(Qt::green)));
     deadGraph->setPen(QPen(QColor(139,94,73)));
+
+    ui->aliveDeadPlot->setInteraction(QCP::iRangeDrag, true);
+    ui->aliveDeadPlot->setInteraction(QCP::iRangeZoom, true);
+    ui->aliveDeadPlot->axisRect()->setRangeDrag(Qt::Horizontal);
+    ui->aliveDeadPlot->axisRect()->setRangeZoom(Qt::Horizontal);
+    ui->aliveDeadPlot->xAxis->setRange(-300,50);
 }
 
 void MainWindow::on_newWorldButton_clicked()
@@ -208,8 +221,8 @@ void MainWindow::on_newWorldButton_clicked()
     stopGame();
     this->thread()->msleep(10);
     if(QMessageBox::question(this,"Старт нового мира","Это приведет к удалению текущего мира. Удалять?") == QMessageBox::Yes){
-        game->resetWorld();
-        game->drawWorld();
+        Game::singleGame().resetWorld();
+        Game::singleGame().drawWorld();
         ui->worldPlot->replot();
 
         aliveGraph->data()->clear();
@@ -221,12 +234,12 @@ void MainWindow::on_newWorldButton_clicked()
 void MainWindow::on_startStopButton_clicked()
 {
     locker.lockForWrite();
-    if(!game->isPlaying){
-        game->isPlaying = true;
+    if(!Game::singleGame().isPlaying){
+        Game::singleGame().isPlaying = true;
         ui->startStopButton->setText("Стоп");
         emit startGame();
     }else{
-        game->isPlaying = false;
+        Game::singleGame().isPlaying = false;
         ui->startStopButton->setText("Старт");
     }
     locker.unlock();
@@ -234,13 +247,16 @@ void MainWindow::on_startStopButton_clicked()
 
 void MainWindow::updateLabels(uint turn, uint alive, uint dead)
 {
+
     ui->turnLabel->setText(QString::number(turn));
     ui->aliveCountLabel->setText(QString::number(alive));
     ui->deadCountLabel->setText(QString::number(dead));
     aliveGraph->addData(turn,alive);
     deadGraph->addData(turn,dead);
-    ui->aliveDeadPlot->replot();
-    ui->aliveDeadPlot->rescaleAxes();
+    ui->aliveDeadPlot->xAxis->setRange(ui->aliveDeadPlot->xAxis->range().lower+(turn-lastTurn),ui->aliveDeadPlot->xAxis->range().upper+(turn-lastTurn));
+    ui->aliveDeadPlot->yAxis->rescale();
+    ui->aliveDeadPlot->replot(QCustomPlot::rpQueuedReplot);
+
 
     if(tracking){
         if(trackingCell->tracking){
@@ -319,19 +335,20 @@ void MainWindow::updateLabels(uint turn, uint alive, uint dead)
             dirArrow->setVisible(false);
         }
     }
+    lastTurn = turn;
 }
 
 void MainWindow::on_skipReplotCheck_clicked(bool checked)
 {
     locker.lockForWrite();
-    game->skipDisplay = checked;
+    Game::singleGame().skipDisplay = checked;
     locker.unlock();
 }
 
 void MainWindow::fpsCount()
 {
     locker.lockForRead();
-    int newFps = game->currentTurn;
+    int newFps = Game::singleGame().currentTurn;
     locker.unlock();
     ui->turnsPerSecondLabel->setText(QString::number((newFps-lastFps)*4.0));
     lastFps = newFps;
@@ -350,7 +367,7 @@ void MainWindow::handleMouseClicking(QMouseEvent *event)
     int x = qRound(ui->worldPlot->xAxis->pixelToCoord(event->x()));
     int y = qRound(ui->worldPlot->yAxis->pixelToCoord(event->y()));
     if(x < Game::worldWidth && y < Game::worldHeight && x >= 0 && y >= 0){
-        trackingCell = game->world[y][x];
+        trackingCell = Game::singleGame().world[y][x];
         tracking = true;
         trackingCell->tracking = true;
         if(trackingCell->childType == Cell::empty){
@@ -430,7 +447,7 @@ void MainWindow::handleMouseClicking(QMouseEvent *event)
 void MainWindow::on_comboBox_currentIndexChanged(int index)
 {
     locker.lockForWrite();
-    game->displayMode = (Game::DisplayMode)index;
+    Game::singleGame().displayMode = (Game::DisplayMode)index;
     locker.unlock();
     switch(index){
         case 0:{
@@ -463,8 +480,8 @@ void MainWindow::on_comboBox_currentIndexChanged(int index)
             colorMap->setGradient(amountGradient);
         }
     }
-    if(!game->isPlaying){
-        game->drawWorld();
+    if(!Game::singleGame().isPlaying){
+        Game::singleGame().drawWorld();
         ui->worldPlot->replot();
     }
 
@@ -548,7 +565,7 @@ void MainWindow::on_worldParameternsButton_clicked()
 void MainWindow::stopGame()
 {
     locker.lockForWrite();
-    game->isPlaying = false;
+    Game::singleGame().isPlaying = false;
     locker.unlock();
     ui->startStopButton->setText("Старт");
 }
@@ -575,7 +592,7 @@ void MainWindow::on_saveWorldButton_clicked()
             str << i->key;
             str << i->value;
         }
-        game->saveWorld(str);
+        Game::singleGame().saveWorld(str);
         f.close();
     }
 }
@@ -623,11 +640,11 @@ void MainWindow::on_loadWorldButton_clicked()
             ui->aliveDeadPlot->replot();
 
 
-            game->loadWorld(str);
-            ui->turnLabel->setText(QString::number(game->currentTurn));
-            ui->aliveCountLabel->setText(QString::number(game->aliveBotsCount));
-            ui->deadCountLabel->setText(QString::number(game->deadBotsCount));
-            game->drawWorld();
+            Game::singleGame().loadWorld(str);
+            ui->turnLabel->setText(QString::number(Game::singleGame().currentTurn));
+            ui->aliveCountLabel->setText(QString::number(Game::singleGame().aliveBotsCount));
+            ui->deadCountLabel->setText(QString::number(Game::singleGame().deadBotsCount));
+            Game::singleGame().drawWorld();
             ui->worldPlot->replot();
             f.close();
         }
@@ -641,5 +658,5 @@ void MainWindow::on_clearGraphButton_clicked()
 {
     aliveGraph->data()->clear();
     deadGraph->data()->clear();
-    deadGraph->addData(game->currentTurn,0);
+    deadGraph->addData(Game::singleGame().currentTurn,0);
 }

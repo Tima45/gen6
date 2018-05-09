@@ -138,6 +138,9 @@ Bot::Bot() : Cell()
 {
     childType = Cell::bot;
     genom = new unsigned short[genomSize];
+    for(unsigned short i = 0; i < genomSize; i++){
+        genom[i] = STAND;
+    }
 }
 
 Bot::Bot(unsigned short x, unsigned short y): Cell(x,y)
@@ -147,6 +150,38 @@ Bot::Bot(unsigned short x, unsigned short y): Cell(x,y)
     for(unsigned short i = 0; i < genomSize; i++){
         genom[i] = STAND;
     }
+}
+
+Bot::Bot(const Bot &other)
+{
+    childType = Cell::bot;
+    genom = new unsigned short[genomSize];
+    for(unsigned short i = 0; i < genomSize; i++){
+        genom[i] = other.genom[i];
+    }
+    genomIndex = other.genomIndex;
+    turnCount = other.turnCount;
+    health = other.health;
+    energy = other.energy;
+    carryMinerals = other.carryMinerals;
+    carrySugar = other.carrySugar;
+    carryTallow = other.carryTallow;
+    defenceMinerals = other.defenceMinerals;
+    longLiveSugar = other.longLiveSugar;
+    direction = other.direction;
+    eatMineralsKof = other.eatMineralsKof;
+    eatSugarKof = other.eatSugarKof;
+    eatTallowKof = other.eatTallowKof;
+    useMineralsKof = other.useMineralsKof;
+    useSugarKof = other.useSugarKof;
+    useTallowKof = other.useTallowKof;
+    shareMineralsKof = other.shareMineralsKof;
+    shareSugarKof = other.shareSugarKof;
+    shareTallowKof = other.shareTallowKof;
+    photoUser = other.photoUser;
+    mineralsUser = other.mineralsUser;
+    tallowUser = other.tallowUser;
+    cloneCount = other.cloneCount;
 }
 
 Bot::~Bot()
@@ -186,14 +221,14 @@ void Bot::readNextCommand()
             unsigned short moveX = x;
             unsigned short moveY = y;
             directionToXY(moveX,moveY);
-            if( Game::singleGame->world[moveY][moveX]->botToMoveOn == nullptr){
-                 Game::singleGame->world[moveY][moveX]->botToMoveOn = this;
+            if( Game::singleGame().world[moveY][moveX]->botToMoveOn == nullptr){
+                 Game::singleGame().world[moveY][moveX]->botToMoveOn = this;
             }else{
-                Bot *otherBot = (Bot*) Game::singleGame->world[moveY][moveX]->botToMoveOn;
+                Bot *otherBot = (Bot*) Game::singleGame().world[moveY][moveX]->botToMoveOn;
                 if(this->energy > otherBot->energy){
                     otherBot->intentionCommand = STAND;
                     otherBot->payForMove();
-                     Game::singleGame->world[moveY][moveX]->botToMoveOn = this;
+                     Game::singleGame().world[moveY][moveX]->botToMoveOn = this;
                 }else{
                     payForMove();
                     intentionCommand = STAND;
@@ -228,8 +263,8 @@ void Bot::readNextCommand()
             unsigned short lookY = y;
             directionToXY(lookX,lookY);
 
-            if(Game::singleGame->world[lookY][lookX]->childType == Cell::bot){
-                Bot *bot = (Bot*)Game::singleGame->world[lookY][lookX];
+            if(Game::singleGame().world[lookY][lookX]->childType == Cell::bot){
+                Bot *bot = (Bot*)Game::singleGame().world[lookY][lookX];
                 if(bot->health < 0){
                     genomIndex += 1;
                 }else {
@@ -391,10 +426,10 @@ void Bot::doSimpleIntention()
                 unsigned short lookX = x;
                 unsigned short lookY = y;
                 directionToXY(lookX,lookY);
-                if( Game::singleGame->world[lookY][lookX]->childType == Cell::bot){
+                if( Game::singleGame().world[lookY][lookX]->childType == Cell::bot){
                     float sugarToShare = shareSugarKof*carrySugar;
                     carrySugar -= sugarToShare;
-                    ((Bot*) Game::singleGame->world[lookY][lookX])->carrySugar += sugarToShare;
+                    ((Bot*) Game::singleGame().world[lookY][lookX])->carrySugar += sugarToShare;
                 }
                 break;
             }
@@ -402,10 +437,10 @@ void Bot::doSimpleIntention()
                 unsigned short lookX = x;
                 unsigned short lookY = y;
                 directionToXY(lookX,lookY);
-                if( Game::singleGame->world[lookY][lookX]->childType == Cell::bot){
+                if( Game::singleGame().world[lookY][lookX]->childType == Cell::bot){
                     float mineralsToShare = shareMineralsKof*carryMinerals;
                     carryMinerals -= mineralsToShare;
-                    ((Bot*) Game::singleGame->world[lookY][lookX])->carryMinerals += mineralsToShare;
+                    ((Bot*) Game::singleGame().world[lookY][lookX])->carryMinerals += mineralsToShare;
                 }
                 break;
             }
@@ -413,10 +448,10 @@ void Bot::doSimpleIntention()
                 unsigned short lookX = x;
                 unsigned short lookY = y;
                 directionToXY(lookX,lookY);
-                if( Game::singleGame->world[lookY][lookX]->childType == Cell::bot){
+                if( Game::singleGame().world[lookY][lookX]->childType == Cell::bot){
                     float tallowToShare = shareTallowKof*carryTallow;
                     carryTallow -= tallowToShare;
-                    ((Bot*) Game::singleGame->world[lookY][lookX])->carryTallow += tallowToShare;
+                    ((Bot*) Game::singleGame().world[lookY][lookX])->carryTallow += tallowToShare;
                 }
                 break;
             }
@@ -460,21 +495,21 @@ void Bot::doMoveIntention()
         directionToXY(toMoveX,toMoveY);
         unsigned short lastX = x;
         unsigned short lastY = y;
-        Game::singleGame->world[toMoveY][toMoveX]->botToMoveOn = nullptr;
-        if(Game::singleGame->world[toMoveY][toMoveX]->childType == Cell::empty){
-            Empty* cell = (Empty*) Game::singleGame->world[toMoveY][toMoveX];
+        Game::singleGame().world[toMoveY][toMoveX]->botToMoveOn = nullptr;
+        if(Game::singleGame().world[toMoveY][toMoveX]->childType == Cell::empty){
+            Empty* cell = (Empty*) Game::singleGame().world[toMoveY][toMoveX];
 
             carryMinerals += cell->minerals;
             cell->minerals = 0;
             cell->setCoords(lastX,lastY);
             this->setCoords(toMoveX,toMoveY);
-            Game::singleGame->world[toMoveY][toMoveX] = this;
-            Game::singleGame->world[lastY][lastX] = cell;
+            Game::singleGame().world[toMoveY][toMoveX] = this;
+            Game::singleGame().world[lastY][lastX] = cell;
             if(cell->tracking){
                 cell->tracking = false;
             }
-        }else if(Game::singleGame->world[toMoveY][toMoveX]->childType == Cell::bot){
-            Bot* otherBot = (Bot*)Game::singleGame->world[toMoveY][toMoveX];
+        }else if(Game::singleGame().world[toMoveY][toMoveX]->childType == Cell::bot){
+            Bot* otherBot = (Bot*)Game::singleGame().world[toMoveY][toMoveX];
             if(otherBot->health <= 0){
                 carryTallow += tallowFromDead;
                 carryTallow += otherBot->carryTallow;
@@ -483,15 +518,15 @@ void Bot::doMoveIntention()
                 if(otherBot->tracking){
                     otherBot->tracking = false;
                 }
-                Game::singleGame->botHell.append(otherBot);
-                Empty* newEmpty = Game::singleGame->emptyHell.takeLast();
+                Game::singleGame().botHell.append(otherBot);
+                Empty* newEmpty = Game::singleGame().emptyHell.takeLast();
                 this->setCoords(toMoveX,toMoveY);
                 newEmpty->minerals = 0;
                 newEmpty->botToMoveOn = nullptr;
                 newEmpty->setCoords(lastX,lastY);
                 newEmpty->recalculateProductivable();
-                Game::singleGame->world[toMoveY][toMoveX] = this;
-                Game::singleGame->world[lastY][lastX] = newEmpty;
+                Game::singleGame().world[toMoveY][toMoveX] = this;
+                Game::singleGame().world[lastY][lastX] = newEmpty;
             }
         }
         payForMove();
@@ -505,8 +540,8 @@ void Bot::doAttackIntention()
         unsigned short toHitX = x;
         unsigned short toHitY = y;
         directionToXY(toHitX,toHitY);
-        if(Game::singleGame->world[toHitY][toHitX]->childType == Cell::bot){
-            Bot* otherBot = (Bot*)Game::singleGame->world[toHitY][toHitX];
+        if(Game::singleGame().world[toHitY][toHitX]->childType == Cell::bot){
+            Bot* otherBot = (Bot*)Game::singleGame().world[toHitY][toHitX];
             float healthBefore = otherBot->health;
             otherBot->health -= damage*(1.0-(defenceFromDefenceMinerals(otherBot->defenceMinerals)));
             if(healthBefore > 0 && otherBot->health <= 0){
@@ -527,15 +562,15 @@ void Bot::doAttackIntention()
                     carrySugar += otherBot->carrySugar;
                     carryMinerals += otherBot->carryMinerals;
 
-                    Game::singleGame->botHell.append(otherBot);
-                    Empty* newEmpty = Game::singleGame->emptyHell.takeLast();
+                    Game::singleGame().botHell.append(otherBot);
+                    Empty* newEmpty = Game::singleGame().emptyHell.takeLast();
                     newEmpty->minerals = 0;
                     newEmpty->botToMoveOn = nullptr;
                     this->setCoords(toHitX,toHitY);
                     newEmpty->setCoords(lastX,lastY);
                     newEmpty->recalculateProductivable();
-                    Game::singleGame->world[toHitY][toHitX] = this;
-                    Game::singleGame->world[lastY][lastX] = newEmpty;
+                    Game::singleGame().world[toHitY][toHitX] = this;
+                    Game::singleGame().world[lastY][lastX] = newEmpty;
                 }
             }
         }
@@ -556,7 +591,7 @@ void Bot::doCloneIntention()
             lookX = x;
             lookY = y;
             directionToXY((Directions)dir,lookX,lookY);
-            if(Game::singleGame->world[lookY][lookX]->childType == Cell::empty){
+            if(Game::singleGame().world[lookY][lookX]->childType == Cell::empty){
                 tempDirections[freeDirectionsCounter] = dir;
                 freeDirectionsCounter++;
             }
@@ -570,14 +605,14 @@ void Bot::doCloneIntention()
             lookY = y;
             directionToXY((Directions)tempDirections[toCloneDir],lookX,lookY);
 
-            Game::singleGame->world[lookY][lookX]->tracking = false;
+            Game::singleGame().world[lookY][lookX]->tracking = false;
 
-            Bot* newBot = Game::singleGame->botHell.takeLast();
+            Bot* newBot = Game::singleGame().botHell.takeLast();
             newBot->carryMinerals = 0;
-            newBot->carryMinerals += ((Empty*)Game::singleGame->world[lookY][lookX])->minerals;
+            newBot->carryMinerals += ((Empty*)Game::singleGame().world[lookY][lookX])->minerals;
 
-            Game::singleGame->emptyHell.append((Empty*)Game::singleGame->world[lookY][lookX]);
-            Game::singleGame->world[lookY][lookX] = newBot;
+            Game::singleGame().emptyHell.append((Empty*)Game::singleGame().world[lookY][lookX]);
+            Game::singleGame().world[lookY][lookX] = newBot;
 
             newBot->setCoords(lookX,lookY);
 
