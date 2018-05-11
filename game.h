@@ -36,8 +36,9 @@ public:
     static uchar turnsToUpdateInSkipMode;
 
     Cell ***world;
-    static const unsigned short worldWidth;
-    static const unsigned short worldHeight;
+    static const unsigned short worldSizeMax;
+    static unsigned short worldWidth;
+    static unsigned short worldHeight;
 
     explicit Game(QObject *parent = 0);
     ~Game();
@@ -56,6 +57,7 @@ public:
     uint aliveBotsCount = 0;
     uint deadBotsCount = 0;
 
+
     void turn();
 
 
@@ -67,6 +69,8 @@ public:
     uint botsToAttackCount = 0;
     Bot **botsToClone = nullptr;
     uint botsToCloneCount = 0;
+
+    Bot **deadBots = nullptr;
 
 
     void resetWorld();

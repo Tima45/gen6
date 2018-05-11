@@ -57,6 +57,8 @@ public:
     QCPItemTracer *aliveTracer;
     QCPItemTracer *deadTracer;
 
+    QSharedPointer<QCPAxisTickerFixed> fixedTicker;
+
     QTimer *fpsTimer;
     uint lastFps = 0;
 
@@ -68,6 +70,9 @@ signals:
 
 
 private slots:
+
+    void resetColorMapRange(int size);
+
     void on_newWorldButton_clicked();
 
     void on_startStopButton_clicked();

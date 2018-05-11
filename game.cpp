@@ -3,8 +3,9 @@
 
 
 uchar Game::turnsToUpdateInSkipMode = 64;
-const unsigned short Game::worldWidth = 512;
-const unsigned short Game::worldHeight = 512;
+const unsigned short Game::worldSizeMax = 512;
+unsigned short Game::worldWidth = 512;
+unsigned short Game::worldHeight = 512;
 
 Game &Game::singleGame()
 {
@@ -15,22 +16,23 @@ Game &Game::singleGame()
 Game::Game(QObject *parent) : QObject(parent)
 {
 
-    botsToDoSimpleThings = new Bot*[worldWidth*worldHeight];
-    botsToMove = new Bot*[worldWidth*worldHeight];
-    botsToAttack = new Bot*[worldWidth*worldHeight];
-    botsToClone = new Bot*[worldWidth*worldHeight];
+    botsToDoSimpleThings = new Bot*[worldSizeMax*worldSizeMax];
+    botsToMove = new Bot*[worldSizeMax*worldSizeMax];
+    botsToAttack = new Bot*[worldSizeMax*worldSizeMax];
+    botsToClone = new Bot*[worldSizeMax*worldSizeMax];
+    deadBots = new Bot*[worldSizeMax*worldSizeMax];
 
-    for(int i = 0; i < worldWidth*worldHeight +1; i++){
+    for(int i = 0; i < worldSizeMax*worldSizeMax+1; i++){
         botHell.append(new Bot(0,0));
         emptyHell.append(new Empty(0,0));
     }
 
     botHell.takeLast(); // wtf???!!
 
-    world = new Cell**[worldHeight];
-    for(unsigned short y = 0; y < worldHeight; y++){
-        world[y] = new Cell*[worldWidth];
-        for(unsigned short x = 0; x < worldWidth; x++){
+    world = new Cell**[worldSizeMax];
+    for(unsigned short y = 0; y < worldSizeMax; y++){
+        world[y] = new Cell*[worldSizeMax];
+        for(unsigned short x = 0; x < worldSizeMax; x++){
             Empty *cell = emptyHell.takeLast();
             cell->minerals = 0;
             cell->setCoords(x,y);
@@ -48,6 +50,7 @@ Game::~Game()
     delete[] botsToMove;
     delete[] botsToAttack;
     delete[] botsToClone;
+    delete[] deadBots;
     for(int i = 0; i < botHell.count(); i++){
         delete botHell.takeLast();
     }
@@ -102,11 +105,21 @@ void Game::turn()
                         }
                     }
                 }else{
+                    if(Bot::rottingDead){
+                        deadBots[deadBotsCount] = bot;
+                    }
+                    bot->rottingTurnsCount++;
                     deadBotsCount++;
                 }
             }
         }
     }
+    if(Bot::rottingDead){
+        for(uint i = 0; i < deadBotsCount; i++){
+            deadBots[i]->doRot();
+        }
+    }
+
     for(uint i = 0; i < botsToDoSimpleThingsCount; i++){
         botsToDoSimpleThings[i]->doSimpleIntention();
     }
@@ -119,12 +132,6 @@ void Game::turn()
     for(uint i = 0; i < botsToCloneCount; i++){
         botsToClone[i]->doCloneIntention();
     }
-/*
-    for(unsigned short y = 0; y < worldHeight; y++){
-        for(unsigned short x = 0; x < worldWidth;x++){
-            world[y][x]->botToMoveOn = nullptr;
-        }
-    }*/
     //-------------------------------------------
     locker.lockForWrite();
     currentTurn++;
@@ -187,6 +194,7 @@ void Game::resetWorld()
 
             firstBot->genomIndex = 0;
             firstBot->turnCount = 0;
+            firstBot->rottingTurnsCount = 0;
 
             firstBot->health = 100;
             firstBot->energy = 80;
@@ -457,6 +465,10 @@ void Game::saveWorld(QDataStream &str)
     str << aliveBotsCount;
     str << deadBotsCount;
 
+    str << Bot::rottingDead;
+    str << Bot::rottingTallow;
+    str << Bot::rottingTurns;
+
     QVector<Bot*> tmpBots;
     QVector<Empty*> tmpEmpty;
     for(unsigned short y = 0; y < worldHeight; y++){
@@ -563,6 +575,10 @@ void Game::loadWorld(QDataStream &str)
     str >> turnsPerSecond;
     str >> aliveBotsCount;
     str >> deadBotsCount;
+
+    str >> Bot::rottingDead;
+    str >> Bot::rottingTallow;
+    str >> Bot::rottingTurns;
 
     int botsCount = 0;
     str >> botsCount;

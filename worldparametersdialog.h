@@ -2,6 +2,7 @@
 #define WORLDPARAMETERSDIALOG_H
 
 #include <QDialog>
+#include "plot/qcustomplot.h"
 #include "bot.h"
 #include "empty.h"
 #include "game.h"
@@ -18,9 +19,13 @@ public:
     explicit WorldParametersDialog(QWidget *parent = 0);
     ~WorldParametersDialog();
     void loadParametres();
+signals:
+    void changeWorldSize(int size);
 
 private slots:
     void on_buttonBox_accepted();
+
+    void on_rottingDeadBox_toggled(bool checked);
 
 private:
     Ui::WorldParametersDialog *ui;

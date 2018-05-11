@@ -53,6 +53,17 @@ void WorldParametersDialog::loadParametres()
 
     ui->defenceKofBox->setValue(Bot::defenceKof);
     ui->longLiveKofBox->setValue(Bot::longLiveKof);
+
+
+    ui->rottingTallowBox->setChecked(Bot::rottingTallow);
+    ui->rottingTurnsBox->setValue(qRound(Bot::rottingTurns));
+
+    ui->rottingDeadBox->setChecked(Bot::rottingDead);
+
+    on_rottingDeadBox_toggled(Bot::rottingDead);
+
+    ui->worldSizeBox->setValue(Game::worldWidth);
+
 }
 
 void WorldParametersDialog::on_buttonBox_accepted()
@@ -107,4 +118,28 @@ void WorldParametersDialog::on_buttonBox_accepted()
     Bot::captureAttack = ui->captureAttackBox->isChecked();
     Bot::defenceKof = ui->defenceKofBox->value();
     Bot::longLiveKof = ui->longLiveKofBox->value();
+
+    Bot::rottingTallow = ui->rottingTallowBox->isChecked();
+    Bot::rottingTurns = ui->rottingTurnsBox->value();
+    Bot::rottingDead = ui->rottingDeadBox->isChecked();
+
+    if(Game::worldWidth != ui->worldSizeBox->value()){
+        if(QMessageBox::question(this,"Внимание","Изменение размера мира влечет удаление текущего мира") == QMessageBox::Yes){
+            Game::worldWidth = ui->worldSizeBox->value();
+            Game::worldHeight = Game::worldWidth;
+            Game::singleGame().resetWorld();
+            emit changeWorldSize(Game::worldWidth);
+        }
+    }
+}
+
+
+void WorldParametersDialog::on_rottingDeadBox_toggled(bool checked)
+{
+    ui->label_29->setEnabled(checked);
+    ui->rottingTurnsBox->setEnabled(checked);
+    ui->rottingTallowBox->setEnabled(checked);
+    if(!checked){
+        ui->rottingTallowBox->setChecked(false);
+    }
 }

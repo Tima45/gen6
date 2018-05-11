@@ -145,6 +145,10 @@ public:
     static float defenceKof;
     static float longLiveKof;
 
+    static bool rottingDead;
+    static float rottingTurns;
+    static bool rottingTallow;
+
     Bot(unsigned short x,unsigned short y);
 
     ~Bot();
@@ -156,6 +160,7 @@ public:
     void doMoveIntention();
     void doAttackIntention();
     void doCloneIntention();
+    void doRot();
 
     void directionToXY(unsigned short &x,unsigned short &y);
     void directionToXY(Directions dir,unsigned short &x,unsigned short &y);
@@ -196,6 +201,8 @@ public:
     uint turnCount = 0;
     uint cloneCount = 0;
     uint killCount = 0;
+
+    uint rottingTurnsCount = 0;
 
 
 

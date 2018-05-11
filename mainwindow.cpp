@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     dialog = new WorldParametersDialog();
     dialog->setAttribute(Qt::WA_ShowModal);
+    connect(dialog,SIGNAL(changeWorldSize(int)),this,SLOT(resetColorMapRange(int)));
 }
 
 MainWindow::~MainWindow()
@@ -66,7 +67,7 @@ void MainWindow::initPlot()
     ui->worldPlot->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
     ui->worldPlot->axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical); 
 
-    QSharedPointer<QCPAxisTickerFixed> fixedTicker(new QCPAxisTickerFixed);
+    fixedTicker = QSharedPointer<QCPAxisTickerFixed>(new QCPAxisTickerFixed);
     fixedTicker->setTickCount(Game::worldWidth);
     fixedTicker->setTickOrigin(0);
     fixedTicker->setTickStep(Game::worldWidth);
@@ -236,6 +237,28 @@ void MainWindow::initPlot()
     ui->aliveDeadPlot->xAxis->setRange(-1000,100);
 }
 
+void MainWindow::resetColorMapRange(int size)
+{
+    colorMap->data()->clear();
+    colorMap->data()->setSize(size,size);
+    colorMap->data()->setRange(QCPRange(0,size-1),QCPRange(0,size-1));
+    ui->worldPlot->xAxis->setRange(QCPRange(0,size));
+    ui->worldPlot->yAxis->setRange(QCPRange(0,size));
+
+    fixedTicker->setTickCount(Game::worldWidth);
+    fixedTicker->setTickOrigin(0);
+    fixedTicker->setTickStep(Game::worldWidth);
+
+    Game::singleGame().resetWorld();
+    Game::singleGame().drawWorld();
+    ui->worldPlot->replot();
+
+    aliveGraph->data()->clear();
+    deadGraph->data()->clear();
+    lastTurn = 0;
+    ui->aliveDeadPlot->xAxis->setRange(-1000,100);
+}
+
 void MainWindow::on_newWorldButton_clicked()
 {
     stopGame();
@@ -249,7 +272,7 @@ void MainWindow::on_newWorldButton_clicked()
         aliveGraph->data()->clear();
         deadGraph->data()->clear();
         lastTurn = 0;
-        ui->aliveDeadPlot->xAxis->setRange(-300,50);
+        ui->aliveDeadPlot->xAxis->setRange(-1000,100);
     }
 
 }
@@ -612,7 +635,7 @@ void MainWindow::on_saveWorldButton_clicked()
         f.open(QIODevice::WriteOnly);
         QDataStream str(&f);
 
-        str << (int)61; //version
+        str << (int)63; //version
         QVector<QCPGraphData>::const_iterator i;
         str << aliveGraph->dataCount();
         for(i = aliveGraph->data()->constBegin(); i != aliveGraph->data()->constEnd(); i++){
@@ -644,7 +667,7 @@ void MainWindow::on_loadWorldButton_clicked()
 
             int version = 0;
             str >> version;
-            if(version != 61){
+            if(version != 63){
                 throw 0;
             }
             QVector<QCPGraphData>::const_iterator i;
@@ -668,8 +691,7 @@ void MainWindow::on_loadWorldButton_clicked()
                 str >> value;
                 deadGraph->addData(key,value);
             }
-            ui->aliveDeadPlot->rescaleAxes();
-            ui->aliveDeadPlot->replot();
+
 
 
             Game::singleGame().loadWorld(str);
@@ -678,6 +700,12 @@ void MainWindow::on_loadWorldButton_clicked()
             ui->deadCountLabel->setText(QString::number(Game::singleGame().deadBotsCount));
             Game::singleGame().drawWorld();
             ui->worldPlot->replot();
+
+            lastTurn = Game::singleGame().currentTurn-1;
+            ui->aliveDeadPlot->xAxis->setRange(Game::singleGame().currentTurn-1000,Game::singleGame().currentTurn+100);
+            ui->aliveDeadPlot->yAxis->rescale();;
+            ui->aliveDeadPlot->replot();
+
             f.close();
         }
         catch(int a){

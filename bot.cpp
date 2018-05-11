@@ -45,6 +45,11 @@ bool Bot::effectiveEat = true;
 float Bot::defenceKof = 1;
 float Bot::longLiveKof = 10;
 
+bool Bot::rottingDead = false;
+float Bot::rottingTurns = 1000;
+bool Bot::rottingTallow = false;
+
+
 uchar* Bot::tempDirections = new uchar[8];
 
 
@@ -511,7 +516,16 @@ void Bot::doMoveIntention()
         }else if(Game::singleGame().world[toMoveY][toMoveX]->childType == Cell::bot){
             Bot* otherBot = (Bot*)Game::singleGame().world[toMoveY][toMoveX];
             if(otherBot->health <= 0){
-                carryTallow += tallowFromDead;
+
+                if(Bot::rottingTallow && Bot::rottingDead){
+                    float rotKof = Bot::rottingTurns-(otherBot->rottingTurnsCount);
+                    if(rotKof > 0){
+                        carryTallow += tallowFromDead/rotKof;
+                    }
+                }else{
+                    carryTallow += tallowFromDead;
+                }
+
                 carryTallow += otherBot->carryTallow;
                 carrySugar += otherBot->carrySugar;
                 carryMinerals += otherBot->carryMinerals;
@@ -556,7 +570,14 @@ void Bot::doAttackIntention()
                         otherBot->tracking = false;
                     }
 
-                    carryTallow += tallowFromDead;
+                    if(Bot::rottingTallow && Bot::rottingDead){
+                        float rotKof = Bot::rottingTurns-(otherBot->rottingTurnsCount);
+                        if(rotKof > 0){
+                            carryTallow += tallowFromDead/rotKof;
+                        }
+                    }else{
+                        carryTallow += tallowFromDead;
+                    }
 
                     carryTallow += otherBot->carryTallow;
                     carrySugar += otherBot->carrySugar;
@@ -619,6 +640,7 @@ void Bot::doCloneIntention()
             newBot->intentionCommand = 0;
             newBot->genomIndex = 0;
             newBot->turnCount = 0;
+            newBot->rottingTurnsCount = 0;
 
             newBot->health = 100;
             newBot->energy = startBotEnergy;
@@ -726,6 +748,23 @@ void Bot::doCloneIntention()
         payForClone();
     }
     payForLive();
+}
+
+void Bot::doRot()
+{
+    if(health <= 0){
+        rottingTurnsCount++;
+        if(rottingTurnsCount >= Bot::rottingTurns){
+            Game::singleGame().botHell.append(this);
+            this->tracking = false;
+            Empty* newEmpty = Game::singleGame().emptyHell.takeLast();
+            newEmpty->minerals = 0;
+            newEmpty->botToMoveOn = nullptr;
+            newEmpty->setCoords(x,y);
+            newEmpty->recalculateProductivable();
+            Game::singleGame().world[y][x] = newEmpty;
+        }
+    }
 }
 
 void Bot::directionToXY(unsigned short &x, unsigned short &y)
