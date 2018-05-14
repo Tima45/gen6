@@ -10,7 +10,7 @@ public:
         empty,
         bot
     };
-    Cell();
+    explicit Cell();
     Cell(unsigned short x,unsigned short y);
     void setCoords(unsigned short x,unsigned short y);
     virtual ~Cell();

@@ -138,7 +138,7 @@ public:
     static float parametrsMutationChance;
     static float mutationSpeedOfParamets;
 
-    static uchar* tempDirections;
+    static char* tempDirections;
     static bool captureAttack;
     static bool effectiveEat;
 
@@ -152,6 +152,7 @@ public:
     Bot(unsigned short x,unsigned short y);
 
     ~Bot();
+    void setCoords(unsigned short x,unsigned short y);
     void clearBot();
     uchar recurtionCounter = 0;
     void readNextCommand();
@@ -204,6 +205,8 @@ public:
 
     uint rottingTurnsCount = 0;
 
+    QString TestName = "";
+
 
 
 
@@ -214,7 +217,7 @@ public:
     void payForPhoto();
     void calculateLifeStyle();
 private:
-    Bot(const Bot &other);
+    explicit Bot(const Bot &other);
     Bot();
 
 };

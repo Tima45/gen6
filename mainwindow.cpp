@@ -1,13 +1,15 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-
+const int MainWindow::appVersion = 64;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    initListWidget();
     initPlot();
+
     ui->emptyGroupBox->setVisible(false);
     ui->botGroupBox->setVisible(false);
 
@@ -40,14 +42,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     dialog = new WorldParametersDialog();
     dialog->setAttribute(Qt::WA_ShowModal);
-    connect(dialog,SIGNAL(changeWorldSize(int)),this,SLOT(resetColorMapRange(int)));
+    connect(dialog,SIGNAL(changeWorldSize(int)),this,SLOT(resetWorldRange(int)));
+    connect(&Game::singleGame(),SIGNAL(resetColorMap(int)),this,SLOT(resetColorMapRange(int)),Qt::DirectConnection);
 }
 
 MainWindow::~MainWindow()
 {
     stopGame();
     this->thread()->msleep(10);
-    gameThread->terminate();
+    gameThread->quit();
     gameThread->deleteLater();
     dialog->deleteLater();
     delete ui;
@@ -86,12 +89,7 @@ void MainWindow::initPlot()
     colorMap->setLayer("low");
     colorMap->data()->setSize(Game::worldWidth,Game::worldHeight);
     colorMap->data()->setRange(QCPRange(0,Game::worldWidth-1),QCPRange(0,Game::worldHeight-1));
-/*
-    for(int y = 0; y < Game::worldHeight; y++){
-        for(int x = 0; x < Game::worldWidth; x++){
-            colorMap->data()->setCell(x,y,rand()%RAND_MAX);
-        }
-    }*/
+
     colorMap->setInterpolate(false);
     colorMap->setAntialiased(false);
     colorMap->setAntialiasedFill(false);
@@ -222,12 +220,14 @@ void MainWindow::initPlot()
     aliveTracer->setPen(Qt::NoPen);
     aliveTracer->setBrush(QBrush(QColor(Qt::green)));
     aliveTracer->setStyle(QCPItemTracer::tsCircle);
+    aliveGraph->addData(0,0);
     aliveTracer->setGraph(aliveGraph);
 
     deadTracer = new QCPItemTracer(ui->aliveDeadPlot);
     deadTracer->setPen(Qt::NoPen);
     deadTracer->setBrush(QBrush(QColor(139,94,73)));
     deadTracer->setStyle(QCPItemTracer::tsCircle);
+    deadGraph->addData(0,0);
     deadTracer->setGraph(deadGraph);
 
     ui->aliveDeadPlot->setInteraction(QCP::iRangeDrag, true);
@@ -235,6 +235,14 @@ void MainWindow::initPlot()
     ui->aliveDeadPlot->axisRect()->setRangeDrag(Qt::Horizontal);
     ui->aliveDeadPlot->axisRect()->setRangeZoom(Qt::Horizontal);
     ui->aliveDeadPlot->xAxis->setRange(-1000,100);
+}
+
+void MainWindow::initListWidget()
+{
+    for(int i = 0; i < Bot::genomSize; i++){
+        GenomCommandListWidgetItem *newItem = new GenomCommandListWidgetItem();
+        ui->genomList->addItem(newItem);
+    }
 }
 
 void MainWindow::resetColorMapRange(int size)
@@ -248,6 +256,9 @@ void MainWindow::resetColorMapRange(int size)
     fixedTicker->setTickCount(Game::worldWidth);
     fixedTicker->setTickOrigin(0);
     fixedTicker->setTickStep(Game::worldWidth);
+}
+void MainWindow::resetWorldRange(int size){
+    resetColorMapRange(size);
 
     Game::singleGame().resetWorld();
     Game::singleGame().drawWorld();
@@ -384,6 +395,9 @@ void MainWindow::updateLabels(uint turn, uint alive, uint dead)
         }
     }
     lastTurn = turn;
+    if(alive == 0){
+        stopGame();
+    }
 }
 
 void MainWindow::on_skipReplotCheck_clicked(bool checked)
@@ -583,25 +597,31 @@ void MainWindow::displayBotInfo(Bot *bot)
 
 
     ui->genomIndexLabel->setText(QString::number(bot->genomIndex));
-    ui->genomList->clear();
-    for(uchar i = 0; i < Bot::genomSize; i++){
-        ui->genomList->addItem(QString::number(i)+": "+Bot::genomCommandsToString((Bot::GenomCommands)bot->genom[i]));
 
+
+    for(uchar i = 0; i < Bot::genomSize; i++){
+        GenomCommandListWidgetItem *item = (GenomCommandListWidgetItem *)ui->genomList->item(i);
+        item->setText(QString::number(i)+": "+Bot::genomCommandsToString((Bot::GenomCommands)bot->genom[i]));
+        item->command = bot->genom[i];
         if(bot->genom[i] == Bot::PHOTO || bot->genom[i] == Bot::EATSUGAR || bot->genom[i] == Bot::SHARESUGAR || bot->genom[i] == Bot::USESUGAR){
-            ui->genomList->item(ui->genomList->count()-1)->setTextColor(QColor(10,128,10));
+            item->setTextColor(QColor(10,128,10));
         }else if(bot->genom[i] == Bot::GO){
-            ui->genomList->item(ui->genomList->count()-1)->setTextColor(QColor(0,200,200));
+            item->setTextColor(QColor(0,200,200));
         }else if(bot->genom[i] == Bot::EATMINERALS || bot->genom[i] == Bot::SHAREMINERALS || bot->genom[i] == Bot::USEMINERALS){
-            ui->genomList->item(ui->genomList->count()-1)->setTextColor(QColor(0,0,255));
+            item->setTextColor(QColor(0,0,255));
         }else if(bot->genom[i] == Bot::ATTACK){
-            ui->genomList->item(ui->genomList->count()-1)->setTextColor(QColor(255,0,0));
+            item->setTextColor(QColor(255,0,0));
         }else if(bot->genom[i] == Bot::EATTALLOW || bot->genom[i] == Bot::USETALLOW || bot->genom[i] == Bot::SHARETALLOW){
-            ui->genomList->item(ui->genomList->count()-1)->setTextColor(QColor(139,94,73));
+            item->setTextColor(QColor(139,94,73));
         }else if(bot->genom[i] == Bot::CLONE){
-            ui->genomList->item(ui->genomList->count()-1)->setTextColor(QColor(200,200,0));
+            item->setTextColor(QColor(200,200,0));
+        }else{
+            item->setTextColor(QColor(0,0,0));
         }
         if(i == (bot->genomIndex+1)%Bot::genomSize){
-            ui->genomList->item(ui->genomList->count()-1)->setFont(QFont("Times", 10, QFont::Bold));
+            item->setFont(QFont("Times", 10, QFont::Bold));
+        }else{
+            item->setFont(QFont("Times", 8, QFont::Normal));
         }
     }
 
@@ -635,7 +655,7 @@ void MainWindow::on_saveWorldButton_clicked()
         f.open(QIODevice::WriteOnly);
         QDataStream str(&f);
 
-        str << (int)63; //version
+        str << appVersion; //version
         QVector<QCPGraphData>::const_iterator i;
         str << aliveGraph->dataCount();
         for(i = aliveGraph->data()->constBegin(); i != aliveGraph->data()->constEnd(); i++){
@@ -667,7 +687,7 @@ void MainWindow::on_loadWorldButton_clicked()
 
             int version = 0;
             str >> version;
-            if(version != 63){
+            if(version != appVersion){
                 throw 0;
             }
             QVector<QCPGraphData>::const_iterator i;
@@ -695,6 +715,7 @@ void MainWindow::on_loadWorldButton_clicked()
 
 
             Game::singleGame().loadWorld(str);
+            f.close();
             ui->turnLabel->setText(QString::number(Game::singleGame().currentTurn));
             ui->aliveCountLabel->setText(QString::number(Game::singleGame().aliveBotsCount));
             ui->deadCountLabel->setText(QString::number(Game::singleGame().deadBotsCount));
@@ -702,11 +723,10 @@ void MainWindow::on_loadWorldButton_clicked()
             ui->worldPlot->replot();
 
             lastTurn = Game::singleGame().currentTurn-1;
-            ui->aliveDeadPlot->xAxis->setRange(Game::singleGame().currentTurn-1000,Game::singleGame().currentTurn+100);
-            ui->aliveDeadPlot->yAxis->rescale();;
+
+            ui->aliveDeadPlot->rescaleAxes();
             ui->aliveDeadPlot->replot();
 
-            f.close();
         }
         catch(int a){
             QMessageBox::critical(this,"Ошибка","Не удалось загрузить файл");
@@ -719,4 +739,68 @@ void MainWindow::on_clearGraphButton_clicked()
     aliveGraph->data()->clear();
     deadGraph->data()->clear();
     deadGraph->addData(Game::singleGame().currentTurn,0);
+}
+
+void MainWindow::on_genomList_itemDoubleClicked(QListWidgetItem *item)
+{
+    GenomCommandListWidgetItem *gItem = (GenomCommandListWidgetItem*)item;
+    switch (gItem->command){
+        case Bot::GenomCommands::MOVEINDEX1:
+        case Bot::GenomCommands::MOVEINDEX2:
+        case Bot::GenomCommands::MOVEINDEX3:
+        case Bot::GenomCommands::MOVEINDEX4:
+        case Bot::GenomCommands::MOVEINDEX5:
+        case Bot::GenomCommands::MOVEINDEX6:
+        case Bot::GenomCommands::MOVEINDEX7:
+        case Bot::GenomCommands::MOVEINDEX8:
+        case Bot::GenomCommands::MOVEINDEX9:
+        case Bot::GenomCommands::MOVEINDEX10:
+        case Bot::GenomCommands::MOVEINDEX11:
+        case Bot::GenomCommands::MOVEINDEX12:
+        case Bot::GenomCommands::MOVEINDEX13:
+        case Bot::GenomCommands::MOVEINDEX14:
+        case Bot::GenomCommands::MOVEINDEX15:
+        case Bot::GenomCommands::MOVEINDEX16:
+        case Bot::GenomCommands::MOVEINDEX17:
+        case Bot::GenomCommands::MOVEINDEX18:
+        case Bot::GenomCommands::MOVEINDEX19:
+        case Bot::GenomCommands::MOVEINDEX20:
+        case Bot::GenomCommands::MOVEINDEX21:
+        case Bot::GenomCommands::MOVEINDEX22:
+        case Bot::GenomCommands::MOVEINDEX23:
+        case Bot::GenomCommands::MOVEINDEX24:
+        case Bot::GenomCommands::MOVEINDEX25:
+        case Bot::GenomCommands::MOVEINDEX26:
+        case Bot::GenomCommands::MOVEINDEX27:
+        case Bot::GenomCommands::MOVEINDEX28:
+        case Bot::GenomCommands::MOVEINDEX29:
+        case Bot::GenomCommands::MOVEINDEX30:
+        case Bot::GenomCommands::MOVEINDEX31:
+        case Bot::GenomCommands::MOVEINDEX32:
+        case Bot::GenomCommands::MOVEINDEX33:
+        case Bot::GenomCommands::MOVEINDEX34:
+        case Bot::GenomCommands::MOVEINDEX35:
+        case Bot::GenomCommands::MOVEINDEX36:
+        case Bot::GenomCommands::MOVEINDEX37:
+        case Bot::GenomCommands::MOVEINDEX38:
+        case Bot::GenomCommands::MOVEINDEX39:
+        case Bot::GenomCommands::MOVEINDEX40:
+        case Bot::GenomCommands::MOVEINDEX41:
+        case Bot::GenomCommands::MOVEINDEX42:
+        case Bot::GenomCommands::MOVEINDEX43:
+        case Bot::GenomCommands::MOVEINDEX44:
+        case Bot::GenomCommands::MOVEINDEX45:
+        case Bot::GenomCommands::MOVEINDEX46:
+        case Bot::GenomCommands::MOVEINDEX47:
+        case Bot::GenomCommands::MOVEINDEX48:
+        case Bot::GenomCommands::MOVEINDEX49:
+        case Bot::GenomCommands::MOVEINDEX50:{
+            unsigned short toMove = (unsigned short)gItem->command-(unsigned short)Bot::GenomCommands::MOVEINDEX1;
+                ui->genomList->setCurrentRow((ui->genomList->currentRow()+toMove+1)%Bot::genomSize);
+            break;
+        }
+        default:{
+            break;
+        }
+    }
 }

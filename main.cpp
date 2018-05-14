@@ -7,7 +7,6 @@
 
 int main(int argc, char *argv[])
 {
-    srand(time(NULL));
     QApplication a(argc, argv);
     a.setApplicationName("Gen");
     a.setApplicationVersion(QString::number(61));

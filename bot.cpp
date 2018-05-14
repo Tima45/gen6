@@ -1,6 +1,7 @@
 #include "bot.h"
 #include "game.h"
 #include "empty.h"
+#include <exception>
 
 const unsigned short Bot::genomSize = 100;
 const float Bot::energyMax = 100;
@@ -50,7 +51,7 @@ float Bot::rottingTurns = 1000;
 bool Bot::rottingTallow = false;
 
 
-uchar* Bot::tempDirections = new uchar[8];
+char* Bot::tempDirections = new char[8];
 
 
 QString Bot::genomCommandsToString(Bot::GenomCommands value)
@@ -151,47 +152,23 @@ Bot::Bot() : Cell()
 Bot::Bot(unsigned short x, unsigned short y): Cell(x,y)
 {
     childType = Cell::bot;
+
     genom = new unsigned short[genomSize];
+
     for(unsigned short i = 0; i < genomSize; i++){
         genom[i] = STAND;
     }
 }
 
-Bot::Bot(const Bot &other)
-{
-    childType = Cell::bot;
-    genom = new unsigned short[genomSize];
-    for(unsigned short i = 0; i < genomSize; i++){
-        genom[i] = other.genom[i];
-    }
-    genomIndex = other.genomIndex;
-    turnCount = other.turnCount;
-    health = other.health;
-    energy = other.energy;
-    carryMinerals = other.carryMinerals;
-    carrySugar = other.carrySugar;
-    carryTallow = other.carryTallow;
-    defenceMinerals = other.defenceMinerals;
-    longLiveSugar = other.longLiveSugar;
-    direction = other.direction;
-    eatMineralsKof = other.eatMineralsKof;
-    eatSugarKof = other.eatSugarKof;
-    eatTallowKof = other.eatTallowKof;
-    useMineralsKof = other.useMineralsKof;
-    useSugarKof = other.useSugarKof;
-    useTallowKof = other.useTallowKof;
-    shareMineralsKof = other.shareMineralsKof;
-    shareSugarKof = other.shareSugarKof;
-    shareTallowKof = other.shareTallowKof;
-    photoUser = other.photoUser;
-    mineralsUser = other.mineralsUser;
-    tallowUser = other.tallowUser;
-    cloneCount = other.cloneCount;
-}
-
 Bot::~Bot()
 {
     delete[] genom;
+}
+
+void Bot::setCoords(unsigned short x, unsigned short y)
+{
+    this->x = x;
+    this->y = y;
 }
 
 
@@ -604,11 +581,11 @@ void Bot::doCloneIntention()
 {
     if(energy > minEnergyToClone){
 
-        char freeDirectionsCounter = 0;
+        int freeDirectionsCounter = 0;
 
         unsigned short lookX = x;
         unsigned short lookY = y;
-        for(uchar dir = 0; dir < 8; dir++){
+        for(char dir = 0; dir < 8; dir++){
             lookX = x;
             lookY = y;
             directionToXY((Directions)dir,lookX,lookY);

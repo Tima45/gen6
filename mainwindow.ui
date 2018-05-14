@@ -997,13 +997,13 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0b0b0b;&quot;&gt;Приложение 6.2&lt;br/&gt;Qt 5.10.1&lt;br/&gt;QCustomPlot 2.0.0&lt;br/&gt;Тимофей&lt;br/&gt;timaisabrony@gmail.com&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0b0b0b;&quot;&gt;Приложение 6.4&lt;br/&gt;Qt 5.10.1&lt;br/&gt;QCustomPlot 2.0.0&lt;br/&gt;Тимофей&lt;br/&gt;timaisabrony@gmail.com&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="styleSheet">
          <string notr="true">color: rgb(179, 179, 179);</string>
         </property>
         <property name="text">
-         <string>v6.2</string>
+         <string>v6.4</string>
         </property>
        </widget>
       </item>

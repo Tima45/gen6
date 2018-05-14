@@ -14,6 +14,7 @@
 #include <QFileDialog>
 #include <QFile>
 #include <QDataStream>
+#include "genomcommandlistwidgetitem.h"
 
 
 namespace Ui {
@@ -27,6 +28,7 @@ class MainWindow : public QMainWindow
 public:
 
 
+    static const int appVersion;
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     QThread *gameThread;
@@ -63,6 +65,7 @@ public:
     uint lastFps = 0;
 
     void initPlot();
+    void initListWidget();
 signals:
     void startGame();
     void playOneTurn();
@@ -72,6 +75,8 @@ signals:
 private slots:
 
     void resetColorMapRange(int size);
+
+    void resetWorldRange(int size);
 
     void on_newWorldButton_clicked();
 
@@ -100,6 +105,8 @@ private slots:
     void on_loadWorldButton_clicked();
 
     void on_clearGraphButton_clicked();
+
+    void on_genomList_itemDoubleClicked(QListWidgetItem *item);
 
 private:
     Ui::MainWindow *ui;

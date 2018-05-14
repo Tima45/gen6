@@ -32,7 +32,8 @@ SOURCES += main.cpp\
     empty.cpp \
     bot.cpp \
     doublecolors.cpp \
-    worldparametersdialog.cpp
+    worldparametersdialog.cpp \
+    genomcommandlistwidgetitem.cpp
 
 HEADERS  += mainwindow.h \
     plot/qcustomplot.h \
@@ -41,7 +42,8 @@ HEADERS  += mainwindow.h \
     empty.h \
     bot.h \
     doublecolors.h \
-    worldparametersdialog.h
+    worldparametersdialog.h \
+    genomcommandlistwidgetitem.h
 
 FORMS    += mainwindow.ui \
     worldparametersdialog.ui

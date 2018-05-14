@@ -81,6 +81,7 @@ public:
 signals:
     void updateLabels(uint currentTurn,uint aliveBots,uint deadBots);
     void emitReplotWorld(QCustomPlot::RefreshPriority);
+    void resetColorMap(int size);
 public slots:
     void infinitGamePlaying();
     void playOneTurn();
