@@ -29,7 +29,8 @@ public:
         SugarAmount,
         MineralsAmount,
         TallowAmount,
-        LiveCount
+        LiveCount,
+        HealthAmount,
     };
 
     static Game &singleGame();

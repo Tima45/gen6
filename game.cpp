@@ -350,6 +350,14 @@ void Game::drawWorld()
                             }
                             break;
                         }
+                        case HealthAmount:{
+                            if(bot->health > 0){
+                                colorMap->data()->setCell(x,y,(bot->health/100.0)*(DoubleColors::AmountMaxColor - DoubleColors::AmountMinColor) + DoubleColors::AmountMinColor);
+                            }else{
+                                colorMap->data()->setCell(x,y,DoubleColors::AmountMinColor);
+                            }
+                            break;
+                        }
                     }
                     locker.unlock();
                 }
