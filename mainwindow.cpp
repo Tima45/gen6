@@ -538,7 +538,8 @@ void MainWindow::on_comboBox_currentIndexChanged(int index)
         }
         case 6:
         case 7:
-        case 8:{
+        case 8:
+        case 9:{
             colorMap->setGradient(amountGradient);
         }
     }

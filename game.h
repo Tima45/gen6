@@ -28,7 +28,8 @@ public:
         LongLiveAmount,
         SugarAmount,
         MineralsAmount,
-        TallowAmount
+        TallowAmount,
+        LiveCount
     };
 
     static Game &singleGame();

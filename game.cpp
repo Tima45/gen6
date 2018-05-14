@@ -342,6 +342,14 @@ void Game::drawWorld()
                             }
                             break;
                         }
+                        case LiveCount:{
+                            if(bot->turnCount < Bot::botsliveTime){
+                                colorMap->data()->setCell(x,y,(bot->turnCount*1.0/Bot::botsliveTime)*(DoubleColors::AmountMaxColor - DoubleColors::AmountMinColor) + DoubleColors::AmountMinColor);
+                            }else{
+                                colorMap->data()->setCell(x,y,DoubleColors::AmountMaxColor);
+                            }
+                            break;
+                        }
                     }
                     locker.unlock();
                 }

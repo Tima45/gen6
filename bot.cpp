@@ -497,7 +497,7 @@ void Bot::doMoveIntention()
                 if(Bot::rottingTallow && Bot::rottingDead){
                     float rotKof = Bot::rottingTurns-(otherBot->rottingTurnsCount);
                     if(rotKof > 0){
-                        carryTallow += tallowFromDead/rotKof;
+                        carryTallow += tallowFromDead*(Bot::rottingTurns/rotKof);
                     }
                 }else{
                     carryTallow += tallowFromDead;
@@ -550,7 +550,7 @@ void Bot::doAttackIntention()
                     if(Bot::rottingTallow && Bot::rottingDead){
                         float rotKof = Bot::rottingTurns-(otherBot->rottingTurnsCount);
                         if(rotKof > 0){
-                            carryTallow += tallowFromDead/rotKof;
+                            carryTallow += tallowFromDead*(Bot::rottingTurns/rotKof);
                         }
                     }else{
                         carryTallow += tallowFromDead;
