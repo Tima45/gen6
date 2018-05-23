@@ -205,10 +205,9 @@ public:
 
     uint rottingTurnsCount = 0;
 
-    QString TestName = "";
-
-
-
+    bool noClone = false;
+    bool specialColor = false;
+    bool noMutation = false;
 
     void payForLive();
     void payForMove();

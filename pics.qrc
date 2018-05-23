@@ -2,5 +2,6 @@
     <qresource prefix="/new/pics">
         <file>w512h5121377940132185095settingsstreamline.png</file>
         <file>f.png</file>
+        <file>k.png</file>
     </qresource>
 </RCC>

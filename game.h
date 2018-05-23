@@ -12,6 +12,8 @@
 #include "bot.h"
 #include "empty.h"
 #include "doublecolors.h"
+#include <chrono>
+#include <thread>
 
 
 
@@ -54,6 +56,7 @@ public:
     bool inTurn = false;
     bool skipDisplay = false;
 
+
     uint currentTurn = 0;
     uint turnsPerSecond = 0;
     uint aliveBotsCount = 0;
@@ -80,6 +83,8 @@ public:
     DisplayMode displayMode;
     void drawWorld();
 
+    void generateNewBot(unsigned short x, unsigned short y, double health);
+
 signals:
     void updateLabels(uint currentTurn,uint aliveBots,uint deadBots);
     void emitReplotWorld(QCustomPlot::RefreshPriority);
@@ -90,6 +95,10 @@ public slots:
     void recalculateMinerals();
     void saveWorld(QDataStream &str);
     void loadWorld(QDataStream &str);
+    void clearSpecialColor();
+private:
+    std::chrono::time_point<std::chrono::steady_clock> begin;
+    std::chrono::time_point<std::chrono::steady_clock> end;
 };
 
 #endif // GAME_H

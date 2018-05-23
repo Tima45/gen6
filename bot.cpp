@@ -185,7 +185,7 @@ void Bot::readNextCommand()
         recurtionCounter = 0;
         return;
     }
-    if(energy >= (energyMax-everyTurnCost)){
+    if(energy >= (energyMax-everyTurnCost) && !noClone){
         intentionCommand = CLONE;
 
         energy = energyMax;
@@ -203,14 +203,14 @@ void Bot::readNextCommand()
             unsigned short moveX = x;
             unsigned short moveY = y;
             directionToXY(moveX,moveY);
-            if( Game::singleGame().world[moveY][moveX]->botToMoveOn == nullptr){
+            if(Game::singleGame().world[moveY][moveX]->botToMoveOn == nullptr){
                  Game::singleGame().world[moveY][moveX]->botToMoveOn = this;
             }else{
-                Bot *otherBot = (Bot*) Game::singleGame().world[moveY][moveX]->botToMoveOn;
+                Bot *otherBot = (Bot*)Game::singleGame().world[moveY][moveX]->botToMoveOn;
                 if(this->energy > otherBot->energy){
                     otherBot->intentionCommand = STAND;
                     otherBot->payForMove();
-                     Game::singleGame().world[moveY][moveX]->botToMoveOn = this;
+                    Game::singleGame().world[moveY][moveX]->botToMoveOn = this;
                 }else{
                     payForMove();
                     intentionCommand = STAND;
@@ -453,10 +453,10 @@ void Bot::doSimpleIntention()
                 float tallowToHealth = useTallowKof*carryTallow;
                 carryTallow -= tallowToHealth;
                 health += tallowToHealth*tallowToHealthKof;
-                if(health > healthMax){
-                    float extraTallow = (health-healthMax)/tallowToHealthKof;
+                if(health > 100.0){
+                    float extraTallow = (health-(100.0))/tallowToHealthKof;
                     carryTallow += extraTallow;
-                    health = healthMax;
+                    health = (100.0);
                 }
                 break;
             }
@@ -471,13 +471,14 @@ void Bot::doSimpleIntention()
 
 void Bot::doMoveIntention()
 {
-    if(health > 0){
+    if(health > 0 && intentionCommand == GO){
         unsigned short toMoveX = x;
         unsigned short toMoveY = y;
         directionToXY(toMoveX,toMoveY);
         unsigned short lastX = x;
         unsigned short lastY = y;
         Game::singleGame().world[toMoveY][toMoveX]->botToMoveOn = nullptr;
+        this->botToMoveOn = nullptr;
         if(Game::singleGame().world[toMoveY][toMoveX]->childType == Cell::empty){
             Empty* cell = (Empty*) Game::singleGame().world[toMoveY][toMoveX];
 
@@ -497,7 +498,7 @@ void Bot::doMoveIntention()
                 if(Bot::rottingTallow && Bot::rottingDead){
                     float rotKof = Bot::rottingTurns-(otherBot->rottingTurnsCount);
                     if(rotKof > 0){
-                        carryTallow += tallowFromDead*(Bot::rottingTurns/rotKof);
+                        carryTallow += tallowFromDead*(rotKof/Bot::rottingTurns);
                     }
                 }else{
                     carryTallow += tallowFromDead;
@@ -521,6 +522,8 @@ void Bot::doMoveIntention()
             }
         }
         payForMove();
+        payForLive();
+    }else if(intentionCommand == STAND){
         payForLive();
     }
 }
@@ -550,7 +553,7 @@ void Bot::doAttackIntention()
                     if(Bot::rottingTallow && Bot::rottingDead){
                         float rotKof = Bot::rottingTurns-(otherBot->rottingTurnsCount);
                         if(rotKof > 0){
-                            carryTallow += tallowFromDead*(Bot::rottingTurns/rotKof);
+                            carryTallow += tallowFromDead*(rotKof/Bot::rottingTurns);
                         }
                     }else{
                         carryTallow += tallowFromDead;
@@ -579,7 +582,7 @@ void Bot::doAttackIntention()
 
 void Bot::doCloneIntention()
 {
-    if(energy > minEnergyToClone){
+    if(energy > minEnergyToClone && !noClone){
 
         int freeDirectionsCounter = 0;
 
@@ -609,6 +612,7 @@ void Bot::doCloneIntention()
             newBot->carryMinerals = 0;
             newBot->carryMinerals += ((Empty*)Game::singleGame().world[lookY][lookX])->minerals;
 
+
             Game::singleGame().emptyHell.append((Empty*)Game::singleGame().world[lookY][lookX]);
             Game::singleGame().world[lookY][lookX] = newBot;
 
@@ -619,7 +623,7 @@ void Bot::doCloneIntention()
             newBot->turnCount = 0;
             newBot->rottingTurnsCount = 0;
 
-            newBot->health = 100;
+            newBot->health = healthMax;
             newBot->energy = startBotEnergy;
 
             newBot->carrySugar = 0;
@@ -646,12 +650,15 @@ void Bot::doCloneIntention()
             newBot->tallowUser = tallowUser;
             newBot->cloneCount = 0;
             newBot->killCount = 0;
+            newBot->specialColor = specialColor;
+            newBot->noClone = false;
+            newBot->noMutation = noMutation;
 
 
             for(unsigned short i = 0; i < genomSize; i++){
                 newBot->genom[i] = genom[i];
             }
-            if(rand()/(float)RAND_MAX < genomMutationChance){
+            if(rand()/(float)RAND_MAX < genomMutationChance && !noMutation){
                 uchar randomCommand = rand() % MOVEINDEX2;
                 if(randomCommand == MOVEINDEX1){
                     randomCommand += rand()%50;
@@ -660,7 +667,7 @@ void Bot::doCloneIntention()
                 newBot->genom[randomPosition] = (GenomCommands)randomCommand;
             }
             newBot->calculateLifeStyle();
-            if(rand()/(float)RAND_MAX < parametrsMutationChance){
+            if(rand()/(float)RAND_MAX < parametrsMutationChance && !noMutation){
                 uchar randomParametr = rand()%9;
                 float mutation = mutationSpeedOfParamets*(powf(-1,rand()%2));
                 switch(randomParametr){

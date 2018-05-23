@@ -15,6 +15,7 @@
 #include <QFile>
 #include <QDataStream>
 #include "genomcommandlistwidgetitem.h"
+#include "editcelldialog.h"
 
 
 namespace Ui {
@@ -34,7 +35,7 @@ public:
     QThread *gameThread;
     Game *game;
 
-    Cell *trackingCell;
+    Cell *trackingCell = nullptr;
     bool tracking = false;
 
     QReadWriteLock locker;
@@ -78,6 +79,8 @@ private slots:
 
     void resetWorldRange(int size);
 
+    void redrawWorld();
+
     void on_newWorldButton_clicked();
 
     void on_startStopButton_clicked();
@@ -108,11 +111,20 @@ private slots:
 
     void on_genomList_itemDoubleClicked(QListWidgetItem *item);
 
+    void on_editButton_clicked();
+
+    void on_editButton_2_clicked();
+
+
+    void on_clearSpecialColorButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     int lastTurn = 0;
-    WorldParametersDialog *dialog;
+    WorldParametersDialog *worldParametersDialog;
+    EditCellDialog *editCellDialog;
     void stopGame();
+    void editCell();
 };
 
 #endif // MAINWINDOW_H

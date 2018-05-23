@@ -27,6 +27,8 @@ private slots:
 
     void on_rottingDeadBox_toggled(bool checked);
 
+    void on_startBotEnergyBox_valueChanged(double arg1);
+
 private:
     Ui::WorldParametersDialog *ui;
 };

@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-const int MainWindow::appVersion = 64;
+const int MainWindow::appVersion = 65;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -40,10 +40,14 @@ MainWindow::MainWindow(QWidget *parent) :
     gameThread->start(QThread::NormalPriority);
 
 
-    dialog = new WorldParametersDialog();
-    dialog->setAttribute(Qt::WA_ShowModal);
-    connect(dialog,SIGNAL(changeWorldSize(int)),this,SLOT(resetWorldRange(int)));
+    worldParametersDialog = new WorldParametersDialog();
+    worldParametersDialog->setAttribute(Qt::WA_ShowModal);
+    connect(worldParametersDialog,SIGNAL(changeWorldSize(int)),this,SLOT(resetWorldRange(int)));
     connect(&Game::singleGame(),SIGNAL(resetColorMap(int)),this,SLOT(resetColorMapRange(int)),Qt::DirectConnection);
+
+    editCellDialog = new EditCellDialog();
+    editCellDialog->setAttribute(Qt::WA_ShowModal);
+    connect(editCellDialog,SIGNAL(redrawWorld()),this,SLOT(redrawWorld()));
 }
 
 MainWindow::~MainWindow()
@@ -52,12 +56,16 @@ MainWindow::~MainWindow()
     this->thread()->msleep(10);
     gameThread->quit();
     gameThread->deleteLater();
-    dialog->deleteLater();
+    worldParametersDialog->deleteLater();
+    editCellDialog->deleteLater();
     delete ui;
 }
 
 void MainWindow::initPlot()
 {
+
+    ui->worldPlot->setPlottingHint(QCP::phFastPolylines,true);
+
     ui->worldPlot->addLayer("low");
     ui->worldPlot->addLayer("mid");
     ui->worldPlot->addLayer("top");
@@ -101,6 +109,7 @@ void MainWindow::initPlot()
     styleGradient.setColorStopAt(DoubleColors::MineralsMaxColor,QColor(128,128,255));
     styleGradient.setColorStopAt(DoubleColors::StandingColor,QColor(69,69,69));
     styleGradient.setColorStopAt(DoubleColors::DeadBotColor,QColor(139,94,73));
+    styleGradient.setColorStopAt(DoubleColors::SpecialColor,QColor(255,128,255));
     styleGradient.setColorStopAt(DoubleColors::PhotoUserMinColor,QColor(69,69,69));
     styleGradient.setColorStopAt(DoubleColors::PhotoUserMaxColor,QColor(0,180,50));
     styleGradient.setColorStopAt(DoubleColors::MineralsUserMinColor,QColor(69,69,69));
@@ -270,12 +279,19 @@ void MainWindow::resetWorldRange(int size){
     ui->aliveDeadPlot->xAxis->setRange(-1000,100);
 }
 
+void MainWindow::redrawWorld()
+{
+    Game::singleGame().drawWorld();
+    ui->worldPlot->replot();
+}
+
 void MainWindow::on_newWorldButton_clicked()
 {
     stopGame();
     this->thread()->msleep(10);
 
     if(QMessageBox::question(this,"Старт нового мира","Это приведет к удалению текущего мира. Удалять?") == QMessageBox::Yes){
+        tracking = false;
         Game::singleGame().resetWorld();
         Game::singleGame().drawWorld();
         ui->worldPlot->replot();
@@ -570,7 +586,7 @@ void MainWindow::on_nextTurnButton_clicked()
 {
     stopGame();
     emit playOneTurn();
-    ui->startStopButton->setText("Старт");;
+    ui->startStopButton->setText("Старт");
 }
 
 void MainWindow::displayBotInfo(Bot *bot)
@@ -605,23 +621,9 @@ void MainWindow::displayBotInfo(Bot *bot)
         GenomCommandListWidgetItem *item = (GenomCommandListWidgetItem *)ui->genomList->item(i);
         item->setText(QString::number(i)+": "+Bot::genomCommandsToString((Bot::GenomCommands)bot->genom[i]));
         item->command = bot->genom[i];
-        if(bot->genom[i] == Bot::PHOTO || bot->genom[i] == Bot::EATSUGAR || bot->genom[i] == Bot::SHARESUGAR || bot->genom[i] == Bot::USESUGAR){
-            item->setTextColor(QColor(10,128,10));
-        }else if(bot->genom[i] == Bot::GO){
-            item->setTextColor(QColor(0,200,200));
-        }else if(bot->genom[i] == Bot::EATMINERALS || bot->genom[i] == Bot::SHAREMINERALS || bot->genom[i] == Bot::USEMINERALS){
-            item->setTextColor(QColor(0,0,255));
-        }else if(bot->genom[i] == Bot::ATTACK){
-            item->setTextColor(QColor(255,0,0));
-        }else if(bot->genom[i] == Bot::EATTALLOW || bot->genom[i] == Bot::USETALLOW || bot->genom[i] == Bot::SHARETALLOW){
-            item->setTextColor(QColor(139,94,73));
-        }else if(bot->genom[i] == Bot::CLONE){
-            item->setTextColor(QColor(200,200,0));
-        }else{
-            item->setTextColor(QColor(0,0,0));
-        }
+        GenomCommandListWidgetItem::colorItem(item,(Bot::GenomCommands)item->command);
         if(i == (bot->genomIndex+1)%Bot::genomSize){
-            item->setFont(QFont("Times", 10, QFont::Bold));
+            item->setFont(QFont("Times", 8, QFont::Bold));
         }else{
             item->setFont(QFont("Times", 8, QFont::Normal));
         }
@@ -634,8 +636,8 @@ void MainWindow::displayBotInfo(Bot *bot)
 void MainWindow::on_worldParameternsButton_clicked()
 {
     stopGame();
-    dialog->loadParametres();
-    dialog->show();
+    worldParametersDialog->loadParametres();
+    worldParametersDialog->show();
 
 }
 
@@ -645,6 +647,15 @@ void MainWindow::stopGame()
     Game::singleGame().isPlaying = false;
     locker.unlock();
     ui->startStopButton->setText("Старт");
+}
+
+void MainWindow::editCell()
+{
+    if(tracking){
+        stopGame();
+        editCellDialog->setCell(trackingCell);
+        editCellDialog->show();
+    }
 }
 
 void MainWindow::on_saveWorldButton_clicked()
@@ -805,4 +816,22 @@ void MainWindow::on_genomList_itemDoubleClicked(QListWidgetItem *item)
             break;
         }
     }
+}
+
+void MainWindow::on_editButton_clicked()
+{
+    editCell();
+}
+
+void MainWindow::on_editButton_2_clicked()
+{
+    editCell();
+}
+
+void MainWindow::on_clearSpecialColorButton_clicked()
+{
+    stopGame();
+    Game::singleGame().clearSpecialColor();
+    Game::singleGame().drawWorld();
+    ui->worldPlot->replot();
 }

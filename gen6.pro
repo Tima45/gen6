@@ -33,7 +33,8 @@ SOURCES += main.cpp\
     bot.cpp \
     doublecolors.cpp \
     worldparametersdialog.cpp \
-    genomcommandlistwidgetitem.cpp
+    genomcommandlistwidgetitem.cpp \
+    editcelldialog.cpp
 
 HEADERS  += mainwindow.h \
     plot/qcustomplot.h \
@@ -43,10 +44,12 @@ HEADERS  += mainwindow.h \
     bot.h \
     doublecolors.h \
     worldparametersdialog.h \
-    genomcommandlistwidgetitem.h
+    genomcommandlistwidgetitem.h \
+    editcelldialog.h
 
 FORMS    += mainwindow.ui \
-    worldparametersdialog.ui
+    worldparametersdialog.ui \
+    editcelldialog.ui
 
 RC_FILE = icon.rc
 

@@ -47,9 +47,6 @@
          </layout>
         </item>
        </layout>
-       <zorder>botsliveTimeBox</zorder>
-       <zorder>label_10</zorder>
-       <zorder>layoutWidget</zorder>
       </widget>
      </item>
      <item>
@@ -90,7 +87,7 @@
           <item>
            <widget class="QLabel" name="label_2">
             <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Минимальное количество сахара окло края осещенной области&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Минимальное количество сахара окло края освещенной области&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
              <string>Сахар мин.</string>
@@ -117,7 +114,7 @@
           <item>
            <widget class="QLabel" name="label_3">
             <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Радиус освященной области&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Радиус освещенной области&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
              <string>Радиус</string>
@@ -346,7 +343,7 @@
         <item row="1" column="0">
          <widget class="QCheckBox" name="effectiveEatBox">
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если включено: бот не может израсходовать ресурсов больше чем ему необходимо для получения максимальной энергии.&lt;br/&gt;Если выключено: бот расходует все ресурсы в ноль, при этом энергия не привишает максимум. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если включено: бот не может израсходовать ресурсов больше чем ему необходимо для получения максимальной энергии.&lt;br/&gt;Если выключено: бот расходует все ресурсы в ноль, при этом энергия не превышает максимум. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string>Эффективное употребление</string>
@@ -777,7 +774,7 @@
               <number>4</number>
              </property>
              <property name="maximum">
-              <double>100.000000000000000</double>
+              <double>98.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -812,7 +809,7 @@
            <item>
             <widget class="QLabel" name="label_21">
              <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Количество энергии расходуемое при выполнении команды &lt;span style=&quot; font-weight:600; color:#cbce06;&quot;&gt;ОТПАЧКОВАТЬ&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Количество энергии расходуемое при выполнении команды &lt;span style=&quot; font-weight:600; color:#cbce06;&quot;&gt;ОТПОЧКОВАТЬ&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
               <string>Цена клонирования</string>
@@ -839,7 +836,7 @@
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Количество жира получаемое ботом который наступил на труп&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
-              <string>Трупный жир</string>
+              <string>Бонусный жир</string>
              </property>
             </widget>
            </item>
@@ -863,7 +860,7 @@
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Максимальное количество здоровья&lt;br/&gt;Новорожденный боты появляются с этим количеством здоровья&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
-              <string>Здоровье макс.</string>
+              <string>Здоровье при рождении</string>
              </property>
             </widget>
            </item>
@@ -873,7 +870,7 @@
               <number>4</number>
              </property>
              <property name="maximum">
-              <double>100000.000000000000000</double>
+              <double>100.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -924,7 +921,7 @@
               <number>4</number>
              </property>
              <property name="maximum">
-              <double>10000.000000000000000</double>
+              <double>1000000.000000000000000</double>
              </property>
             </widget>
            </item>

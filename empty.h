@@ -30,8 +30,6 @@ public:
     void recalculateGrowSpeed(float awayFromCenter);
     void recalculateLocalMineralsMax(float awayFromCenter);
     void recalculateProductivable();
-
-    void clearCell();
 };
 
 #endif // EMPTY_H

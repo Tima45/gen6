@@ -7,7 +7,8 @@ const double DoubleColors::StandingColor = 0.11;
 const double DoubleColors::DeadBotColor = 0.12;
 
 
-const double DoubleColors::PhotoUserMinColor = 0.13;
+const double DoubleColors::SpecialColor = 0.13;
+const double DoubleColors::PhotoUserMinColor = 0.14;
 const double DoubleColors::PhotoUserMaxColor = 0.39;
 const double DoubleColors::MineralsUserMinColor = 0.40;
 const double DoubleColors::MineralsUserMaxColor = 0.69;

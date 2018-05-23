@@ -2,6 +2,8 @@
 
 
 
+
+
 uchar Game::turnsToUpdateInSkipMode = 64;
 const unsigned short Game::worldSizeMax = 512;
 unsigned short Game::worldWidth = 512;
@@ -71,7 +73,6 @@ Game::~Game()
 
 void Game::turn()
 {
-
     locker.lockForWrite();
     inTurn = true;
     locker.unlock();
@@ -142,6 +143,13 @@ void Game::turn()
     currentTurn++;
     locker.unlock();
 
+    end = std::chrono::steady_clock::now();
+
+    auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+
+
+    begin = std::chrono::steady_clock::now();
+
     locker.lockForRead();
     if(skipDisplay){
         locker.unlock();
@@ -150,9 +158,11 @@ void Game::turn()
         }
     }else{
         locker.unlock();
-        emit updateLabels(currentTurn,aliveBotsCount,deadBotsCount);
         drawWorld();
-        emit emitReplotWorld(QCustomPlot::rpQueuedReplot);
+        if(elapsed.count() > 200){
+            emit updateLabels(currentTurn,aliveBotsCount,deadBotsCount);
+            emit emitReplotWorld(QCustomPlot::rpQueuedReplot);
+        }
     }
     locker.lockForWrite();
     inTurn = false;
@@ -190,61 +200,23 @@ void Game::resetWorld()
                     cell->recalculateProductivable();
                     world[y][x] = cell;
                 }
+                world[y][x]->botToMoveOn = nullptr;
             }
         }
         if(true){
-            Bot* firstBot = botHell.takeLast();
-            firstBot->TestName = "first";
-            for(unsigned short i = 0; i < Bot::genomSize; i++){
-                firstBot->genom[i] = Bot::STAND;
-            }
-
-            for(unsigned short i = 0; i < (Bot::genomSize-3); i+=3){
-                firstBot->genom[i] = Bot::PHOTO;
-                firstBot->genom[i+1] = Bot::EATSUGAR;
-            }
-
-
-
-
-            firstBot->genomIndex = 0;
-            firstBot->turnCount = 0;
-            firstBot->rottingTurnsCount = 0;
-
-            firstBot->health = 100;
-            firstBot->energy = 80;
-
-            firstBot->carryMinerals = 0;
-            firstBot->carrySugar = 0;
-            firstBot->carryTallow = 0;
-
-            firstBot->defenceMinerals = 0;
-            firstBot->longLiveSugar = 0;
-            firstBot->direction = rand()%8;
-
-            firstBot->eatMineralsKof = 1;
-            firstBot->eatSugarKof = 1;
-            firstBot->eatTallowKof = 1;
-
-            firstBot->useMineralsKof = 1;
-            firstBot->useSugarKof = 1;
-            firstBot->useTallowKof = 1;
-
-            firstBot->shareMineralsKof = 1;
-            firstBot->shareSugarKof = 1;
-            firstBot->shareTallowKof = 1;
-
-
-            firstBot->photoUser = 0;
-            firstBot->mineralsUser = 0;
-            firstBot->tallowUser = 0;
-            firstBot->cloneCount = 0;
-            firstBot->calculateLifeStyle();
-
-            firstBot->setCoords(worldHeight/2,worldWidth/2);
-            emptyHell.append((Empty*)world[worldWidth/2][worldHeight/2]);
-            world[worldWidth/2][worldHeight/2] = firstBot;
+            generateNewBot(worldWidth/2,worldHeight/2,100);
         }
+        if(false){
+            generateNewBot(worldWidth/2 +1,worldHeight/2,0);
+            generateNewBot(worldWidth/2 +1,worldHeight/2 +1,0);
+            generateNewBot(worldWidth/2,worldHeight/2 +1,0);
+            generateNewBot(worldWidth/2 -1,worldHeight/2 +1,0);
+            generateNewBot(worldWidth/2 -1,worldHeight/2,0);
+            generateNewBot(worldWidth/2 -1,worldHeight/2 -1,0);
+            generateNewBot(worldWidth/2,worldHeight/2 -1,0);
+            generateNewBot(worldWidth/2 +1,worldHeight/2 -1,0);
+        }
+
     }else{
         locker.unlock();
     }
@@ -269,17 +241,21 @@ void Game::drawWorld()
                     locker.lockForRead();
                     switch (displayMode) {
                         case Style:{
-                            if((bot->photoUser == bot->mineralsUser) && (bot->photoUser == bot->tallowUser)){
-                                colorMap->data()->setCell(x,y,DoubleColors::StandingColor);
+                            if(bot->specialColor){
+                                colorMap->data()->setCell(x,y,DoubleColors::SpecialColor);
                             }else{
-                                if((bot->photoUser >= bot->mineralsUser) && (bot->photoUser >=  bot->tallowUser)){
-                                    colorMap->data()->setCell(x,y,(bot->photoUser/(bot->photoUser+bot->mineralsUser+bot->tallowUser))*(DoubleColors::PhotoUserMaxColor - DoubleColors::PhotoUserMinColor) + DoubleColors::PhotoUserMinColor);
-                                }
-                                if((bot->mineralsUser >= bot->photoUser) && (bot->mineralsUser >=  bot->tallowUser)){
-                                    colorMap->data()->setCell(x,y,(bot->mineralsUser/(bot->photoUser+bot->mineralsUser+bot->tallowUser))*(DoubleColors::MineralsUserMaxColor - DoubleColors::MineralsUserMinColor) + DoubleColors::MineralsUserMinColor);
-                                }
-                                if((bot->tallowUser >= bot->photoUser) && (bot->tallowUser >=  bot->photoUser)){
-                                    colorMap->data()->setCell(x,y,(bot->tallowUser/(bot->photoUser+bot->mineralsUser+bot->tallowUser))*(DoubleColors::TallowUserMaxColor - DoubleColors::TallowUserMinColor) + DoubleColors::TallowUserMinColor);
+                                if((bot->photoUser == bot->mineralsUser) && (bot->photoUser == bot->tallowUser)){
+                                    colorMap->data()->setCell(x,y,DoubleColors::StandingColor);
+                                }else{
+                                    if((bot->photoUser >= bot->mineralsUser) && (bot->photoUser >=  bot->tallowUser)){
+                                        colorMap->data()->setCell(x,y,(bot->photoUser/(bot->photoUser+bot->mineralsUser+bot->tallowUser))*(DoubleColors::PhotoUserMaxColor - DoubleColors::PhotoUserMinColor) + DoubleColors::PhotoUserMinColor);
+                                    }
+                                    if((bot->mineralsUser >= bot->photoUser) && (bot->mineralsUser >=  bot->tallowUser)){
+                                        colorMap->data()->setCell(x,y,(bot->mineralsUser/(bot->photoUser+bot->mineralsUser+bot->tallowUser))*(DoubleColors::MineralsUserMaxColor - DoubleColors::MineralsUserMinColor) + DoubleColors::MineralsUserMinColor);
+                                    }
+                                    if((bot->tallowUser >= bot->photoUser) && (bot->tallowUser >=  bot->photoUser)){
+                                        colorMap->data()->setCell(x,y,(bot->tallowUser/(bot->photoUser+bot->mineralsUser+bot->tallowUser))*(DoubleColors::TallowUserMaxColor - DoubleColors::TallowUserMinColor) + DoubleColors::TallowUserMinColor);
+                                    }
                                 }
                             }
                             break;
@@ -366,14 +342,74 @@ void Game::drawWorld()
     }
 }
 
+void Game::generateNewBot(unsigned short x, unsigned short y,double health)
+{
+    Bot* firstBot = botHell.takeLast();
+    //firstBot->TestName = "first";
+    for(unsigned short i = 0; i < Bot::genomSize; i++){
+        firstBot->genom[i] = Bot::STAND;
+    }
+
+    for(unsigned short i = 0; i < (Bot::genomSize-3); i+=3){
+        firstBot->genom[i] = Bot::PHOTO;
+        firstBot->genom[i+1] = Bot::EATSUGAR;
+    }
+
+
+
+
+    firstBot->genomIndex = 0;
+    firstBot->turnCount = 0;
+    firstBot->rottingTurnsCount = 0;
+
+    firstBot->health = health;
+    firstBot->energy = 80;
+    firstBot->noClone = false;
+    firstBot->noMutation = false;
+    firstBot->specialColor = false;
+
+    firstBot->carryMinerals = 0;
+    firstBot->carrySugar = 0;
+    firstBot->carryTallow = 0;
+
+    firstBot->defenceMinerals = 0;
+    firstBot->longLiveSugar = 0;
+    firstBot->direction = rand()%8;
+
+    firstBot->eatMineralsKof = 1;
+    firstBot->eatSugarKof = 1;
+    firstBot->eatTallowKof = 1;
+
+    firstBot->useMineralsKof = 1;
+    firstBot->useSugarKof = 1;
+    firstBot->useTallowKof = 1;
+
+    firstBot->shareMineralsKof = 1;
+    firstBot->shareSugarKof = 1;
+    firstBot->shareTallowKof = 1;
+
+
+    firstBot->photoUser = 0;
+    firstBot->mineralsUser = 0;
+    firstBot->tallowUser = 0;
+    firstBot->cloneCount = 0;
+    firstBot->calculateLifeStyle();
+
+    firstBot->setCoords(x,y);
+    emptyHell.append((Empty*)world[y][x]);
+    world[y][x] = firstBot;
+}
+
 void Game::infinitGamePlaying()
 {
     srand(time(NULL));
+    begin = std::chrono::steady_clock::now();
     locker.lockForRead();
     while(isPlaying){
         locker.unlock();
         turn();
         locker.lockForRead();
+        this->thread()->sleep(0);
     }
     locker.unlock();
 }
@@ -488,6 +524,10 @@ void Game::saveWorld(QDataStream &str)
         str << bot->shareTallowKof;
         str << bot->cloneCount;
         str << bot->killCount;
+
+        str << bot->noClone;
+        str << bot->specialColor;
+        str << bot->noMutation;
     }
     str << tmpEmpty.count();
     for(unsigned int i = 0; i < (unsigned int)tmpEmpty.count(); i++){
@@ -603,6 +643,10 @@ void Game::loadWorld(QDataStream &str)
         str >> bot->shareTallowKof;
         str >> bot->cloneCount;
         str >> bot->killCount;
+
+        str >> bot->noClone;
+        str >> bot->specialColor;
+        str >> bot->noMutation;
         world[bot->y][bot->x] = bot;
     }
 
@@ -618,5 +662,17 @@ void Game::loadWorld(QDataStream &str)
         str >> cell->localMineralsMax;
         str >> cell->mineralsGrowSpeed;
         world[cell->y][cell->x] = cell;
+    }
+}
+
+void Game::clearSpecialColor()
+{
+    for(unsigned short y = 0; y < worldSizeMax; y++){
+        for(unsigned short x = 0; x < worldSizeMax;x++){
+            if(world[y][x]->childType == Cell::bot){
+                Bot *bot = (Bot *)world[y][x];
+                bot->specialColor = false;
+            }
+        }
     }
 }

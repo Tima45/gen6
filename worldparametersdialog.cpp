@@ -143,3 +143,8 @@ void WorldParametersDialog::on_rottingDeadBox_toggled(bool checked)
         ui->rottingTallowBox->setChecked(false);
     }
 }
+
+void WorldParametersDialog::on_startBotEnergyBox_valueChanged(double arg1)
+{
+    ui->everyTurnCostBox->setMaximum(100-arg1);
+}

@@ -5,6 +5,7 @@
 class DoubleColors
 {
 public:
+    static const double SpecialColor;
     static const double MineralsMaxColor;
     static const double MineralsMinColor;
     static const double DeadBotColor;

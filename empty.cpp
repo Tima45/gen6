@@ -70,9 +70,3 @@ void Empty::recalculateProductivable()
         producive = false;
     }
 }
-
-void Empty::clearCell()
-{
-
-}
-
