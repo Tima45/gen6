@@ -75,6 +75,7 @@ QString Bot::genomCommandsToString(Bot::GenomCommands value)
         case USETALLOW             : return "ИСПОЛЬЗУЙ ЖИР";
         case LOOKENERGY            : return "ПРОВЕРЬ ЭНЕРГИЮ";
         case LOOKUP                : return "ПОСМОТРИ ВПЕРЕД";
+        case LOOKHEALTH            : return "ПРОВЕРЬ ЗДОРОВЬЕ";
         case CLONE                 : return "ОТПОЧКОВАТЬ";
         case MOVEINDEX1            : return "ПЕРЕХОД НА 1";
         case MOVEINDEX2            : return "ПЕРЕХОД НА 2";
@@ -230,9 +231,17 @@ void Bot::readNextCommand()
         }
 
         case LOOKENERGY:{
-            if(energy > energyMax*0.5){
+            if(energy > minEnergyToClone){
                 genomIndex += 2;
             }else if(energy > energyMax*0.2){
+                genomIndex += 1;
+            }
+            readNextCommand();
+            break;
+        }
+
+        case LOOKHEALTH:{
+            if(health > 50){
                 genomIndex += 1;
             }
             readNextCommand();

@@ -366,7 +366,7 @@
             </font>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Уберает фиолетовую расскраску со всех ботов&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Убирает фиолетовую расскраску со всех ботов&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
             <string>c</string>
@@ -1080,13 +1080,13 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0b0b0b;&quot;&gt;Приложение 6.5&lt;br/&gt;Qt 5.10.1&lt;br/&gt;QCustomPlot 2.0.0&lt;br/&gt;Тимофей&lt;br/&gt;timaisabrony@gmail.com&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#0b0b0b;&quot;&gt;Приложение 6.6&lt;br/&gt;Qt 5.10.1&lt;br/&gt;QCustomPlot 2.0.0&lt;br/&gt;Тимофей&lt;br/&gt;timaisabrony@gmail.com&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="styleSheet">
          <string notr="true">color: rgb(179, 179, 179);</string>
         </property>
         <property name="text">
-         <string>v6.5</string>
+         <string>v6.6</string>
         </property>
        </widget>
       </item>

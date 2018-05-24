@@ -33,6 +33,7 @@ public:
         USETALLOW,
 
         LOOKENERGY,
+        LOOKHEALTH,
         LOOKUP,
 
         CLONE,
