@@ -24,6 +24,9 @@ signals:
     void redrawWorld();
 
 private slots:
+    void setBotsFields(Bot *bot);
+    void setEmptysFields(Empty *cell);
+    void setFieldsByBot(Bot* bot);
     void on_cellTypeBox_currentIndexChanged(int index);
 
     void on_genomCommandsList_itemDoubleClicked(QListWidgetItem *item);
@@ -31,6 +34,12 @@ private slots:
     void on_buttonBox_accepted();
 
     void on_genomList_itemDoubleClicked(QListWidgetItem *item);
+
+    void on_randomizeGenomButton_clicked();
+
+    void on_saveBotButton_clicked();
+
+    void on_loadBotButton_clicked();
 
 private:
     Ui::EditCellDialog *ui;

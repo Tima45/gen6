@@ -36,6 +36,9 @@ public:
     };
 
     static Game &singleGame();
+    static const int gameVersion;
+    static void saveBot(QDataStream &str, Bot* bot);
+    static void loadBot(QDataStream &str, Bot* bot);
 
     static uchar turnsToUpdateInSkipMode;
 

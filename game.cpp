@@ -8,11 +8,81 @@ uchar Game::turnsToUpdateInSkipMode = 64;
 const unsigned short Game::worldSizeMax = 512;
 unsigned short Game::worldWidth = 512;
 unsigned short Game::worldHeight = 512;
+const int Game::gameVersion = 66;
 
 Game &Game::singleGame()
 {
     static Game g(0);
     return g;
+}
+
+void Game::saveBot(QDataStream &str, Bot *bot)
+{
+    for(unsigned short j = 0; j < Bot::genomSize; j++){
+        str << bot->genom[j];
+    }
+    str << bot->x;
+    str << bot->y;
+    str << bot->genomIndex;
+    str << bot->turnCount;
+    str << bot->health;
+    str << bot->energy;
+    str << bot->carryMinerals;
+    str << bot->carrySugar;
+    str << bot->carryTallow;
+    str << bot->defenceMinerals;
+    str << bot->longLiveSugar;
+    str << bot->direction;
+    str << bot->eatMineralsKof;
+    str << bot->eatSugarKof;
+    str << bot->eatTallowKof;
+    str << bot->useMineralsKof;
+    str << bot->useSugarKof;
+    str << bot->useTallowKof;
+    str << bot->shareMineralsKof;
+    str << bot->shareSugarKof;
+    str << bot->shareTallowKof;
+    str << bot->cloneCount;
+    str << bot->killCount;
+
+    str << bot->noClone;
+    str << bot->specialColor;
+    str << bot->noMutation;
+}
+
+void Game::loadBot(QDataStream &str, Bot *bot)
+{
+    for(unsigned short j = 0; j < Bot::genomSize; j++){
+        str >> bot->genom[j];
+    }
+    bot->calculateLifeStyle();
+    str >> bot->x;
+    str >> bot->y;
+    str >> bot->genomIndex;
+    str >> bot->turnCount;
+    str >> bot->health;
+    str >> bot->energy;
+    str >> bot->carryMinerals;
+    str >> bot->carrySugar;
+    str >> bot->carryTallow;
+    str >> bot->defenceMinerals;
+    str >> bot->longLiveSugar;
+    str >> bot->direction;
+    str >> bot->eatMineralsKof;
+    str >> bot->eatSugarKof;
+    str >> bot->eatTallowKof;
+    str >> bot->useMineralsKof;
+    str >> bot->useSugarKof;
+    str >> bot->useTallowKof;
+    str >> bot->shareMineralsKof;
+    str >> bot->shareSugarKof;
+    str >> bot->shareTallowKof;
+    str >> bot->cloneCount;
+    str >> bot->killCount;
+
+    str >> bot->noClone;
+    str >> bot->specialColor;
+    str >> bot->noMutation;
 }
 
 Game::Game(QObject *parent) : QObject(parent)
@@ -497,37 +567,7 @@ void Game::saveWorld(QDataStream &str)
     }
     str << tmpBots.count();
     for(unsigned int i = 0; i < (unsigned int)tmpBots.count(); i++){
-        Bot* bot = tmpBots.at(i);
-        for(unsigned short j = 0; j < Bot::genomSize; j++){
-            str << bot->genom[j];
-        }
-        str << bot->x;
-        str << bot->y;
-        str << bot->genomIndex;
-        str << bot->turnCount;
-        str << bot->health;
-        str << bot->energy;
-        str << bot->carryMinerals;
-        str << bot->carrySugar;
-        str << bot->carryTallow;
-        str << bot->defenceMinerals;
-        str << bot->longLiveSugar;
-        str << bot->direction;
-        str << bot->eatMineralsKof;
-        str << bot->eatSugarKof;
-        str << bot->eatTallowKof;
-        str << bot->useMineralsKof;
-        str << bot->useSugarKof;
-        str << bot->useTallowKof;
-        str << bot->shareMineralsKof;
-        str << bot->shareSugarKof;
-        str << bot->shareTallowKof;
-        str << bot->cloneCount;
-        str << bot->killCount;
-
-        str << bot->noClone;
-        str << bot->specialColor;
-        str << bot->noMutation;
+        saveBot(str,tmpBots.at(i));
     }
     str << tmpEmpty.count();
     for(unsigned int i = 0; i < (unsigned int)tmpEmpty.count(); i++){
@@ -616,37 +656,7 @@ void Game::loadWorld(QDataStream &str)
 
     for(unsigned int i = 0; i < (unsigned int)botsCount; i++){
         Bot* bot = botHell.takeLast();
-        for(unsigned short j = 0; j < Bot::genomSize; j++){
-            str >> bot->genom[j];
-        }
-        bot->calculateLifeStyle();
-        str >> bot->x;
-        str >> bot->y;
-        str >> bot->genomIndex;
-        str >> bot->turnCount;
-        str >> bot->health;
-        str >> bot->energy;
-        str >> bot->carryMinerals;
-        str >> bot->carrySugar;
-        str >> bot->carryTallow;
-        str >> bot->defenceMinerals;
-        str >> bot->longLiveSugar;
-        str >> bot->direction;
-        str >> bot->eatMineralsKof;
-        str >> bot->eatSugarKof;
-        str >> bot->eatTallowKof;
-        str >> bot->useMineralsKof;
-        str >> bot->useSugarKof;
-        str >> bot->useTallowKof;
-        str >> bot->shareMineralsKof;
-        str >> bot->shareSugarKof;
-        str >> bot->shareTallowKof;
-        str >> bot->cloneCount;
-        str >> bot->killCount;
-
-        str >> bot->noClone;
-        str >> bot->specialColor;
-        str >> bot->noMutation;
+        loadBot(str,bot);
         world[bot->y][bot->x] = bot;
     }
 

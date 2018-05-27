@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-const int MainWindow::appVersion = 65;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -291,7 +290,7 @@ void MainWindow::on_newWorldButton_clicked()
     this->thread()->msleep(10);
 
     if(QMessageBox::question(this,"Старт нового мира","Это приведет к удалению текущего мира. Удалять?") == QMessageBox::Yes){
-        tracking = false;
+        stopTrackingCell();
         Game::singleGame().resetWorld();
         Game::singleGame().drawWorld();
         ui->worldPlot->replot();
@@ -403,11 +402,7 @@ void MainWindow::updateLabels(uint turn, uint alive, uint dead)
             traceRightBottom->position->setCoords(trackingCell->x+0.5,trackingCell->y-0.5);
 
         }else{
-            tracking = false;
-            cursor->setVisible(false);
-            traceLeftTop->setVisible(false);
-            traceRightBottom->setVisible(false);
-            dirArrow->setVisible(false);
+            stopTrackingCell();
         }
     }
     lastTurn = turn;
@@ -668,7 +663,7 @@ void MainWindow::on_saveWorldButton_clicked()
         f.open(QIODevice::WriteOnly);
         QDataStream str(&f);
 
-        str << appVersion; //version
+        str << Game::gameVersion; //version
         QVector<QCPGraphData>::const_iterator i;
         str << aliveGraph->dataCount();
         for(i = aliveGraph->data()->constBegin(); i != aliveGraph->data()->constEnd(); i++){
@@ -684,14 +679,21 @@ void MainWindow::on_saveWorldButton_clicked()
         f.close();
     }
 }
-
+void MainWindow::stopTrackingCell(){
+    tracking = false;
+    cursor->setVisible(false);
+    traceLeftTop->setVisible(false);
+    traceRightBottom->setVisible(false);
+    dirArrow->setVisible(false);
+}
 void MainWindow::on_loadWorldButton_clicked()
 {
     stopGame();
     QString filePath = QFileDialog::getOpenFileName(this,"Загрузить мир","","GenWorld (*.gw);");
     if(!filePath.isEmpty()){
         QFile f(filePath);
-        tracking = false;
+        stopTrackingCell();
+
         try{
             if(!f.open(QIODevice::ReadOnly)){
                 throw 0;
@@ -700,7 +702,7 @@ void MainWindow::on_loadWorldButton_clicked()
 
             int version = 0;
             str >> version;
-            if(version != appVersion){
+            if(version != Game::gameVersion){
                 throw 0;
             }
             QVector<QCPGraphData>::const_iterator i;

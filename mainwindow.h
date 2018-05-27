@@ -27,9 +27,6 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-
-
-    static const int appVersion;
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     QThread *gameThread;
@@ -69,12 +66,13 @@ public:
     void initListWidget();
 signals:
     void startGame();
+
     void playOneTurn();
 
 
 
 private slots:
-
+    void stopTrackingCell();
     void resetColorMapRange(int size);
 
     void resetWorldRange(int size);
