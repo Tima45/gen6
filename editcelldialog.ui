@@ -310,7 +310,7 @@
         <item row="2" column="1">
          <widget class="QDoubleSpinBox" name="carrySugarBox">
           <property name="maximum">
-           <double>100000.000000000000000</double>
+           <double>10000000000.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -324,7 +324,7 @@
         <item row="4" column="1">
          <widget class="QDoubleSpinBox" name="carryTallowBox">
           <property name="maximum">
-           <double>100000.000000000000000</double>
+           <double>10000000000.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -359,7 +359,7 @@
         <item row="3" column="1">
          <widget class="QDoubleSpinBox" name="carryMineralsBox">
           <property name="maximum">
-           <double>100000.000000000000000</double>
+           <double>10000000000.000000000000000</double>
           </property>
          </widget>
         </item>
